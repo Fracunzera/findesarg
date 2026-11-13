@@ -1,0 +1,21 @@
+{% from "macros.html" import ico %}
+{# Necesita: ev, ciudad #}
+{% set ini = ev.inicio | hora_local(ciudad.timezone) %}
+<li class="ev">
+  <p class="ev__fecha" aria-hidden="true">
+    <span class="ev__dia">{{ ini[:3] }}</span>
+    <span class="ev__num">{{ ini.split(" ")[1].split("/")[0] }}</span>
+  </p>
+  <div class="ev__cuerpo">
+    <p class="ev__hora">
+      <span class="sr">{{ ev | cuando(ciudad.timezone) }}</span>
+      <span aria-hidden="true">{% if ev.hora_confirmada %}{{ ini[-5:] }} h{% if ev.fin %} a {{ (ev.fin | hora_local(ciudad.timezone))[-5:] }} h{% endif %}{% else %}Horario a confirmar{% endif %}</span>
+    </p>
+    <h3 class="ev__titulo"><a href="/{{ ciudad.slug }}/evento/{{ ev.slug }}">{{ ev.titulo }}</a></h3>
+    {% if ev.lugar_texto %}<p class="ev__lugar">{{ ico("i-pin") }} <span>{{ ev.lugar_texto }}</span></p>{% endif %}
+    <p class="ev__etiquetas">
+      <span class="cat cat--{{ ev.categoria }}">{{ CATEGORIAS.get(ev.categoria, "Otro") }}</span>
+      {% if ev.gratis %}<span class="gratis">{{ ico("i-check") }} Gratis</span>{% endif %}
+    </p>
+  </div>
+</li>

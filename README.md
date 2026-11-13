@@ -59,7 +59,9 @@ docker compose logs -f worker
 | Ruta | Qué muestra |
 |---|---|
 | `/` | Redirige a la primera ciudad |
-| `/rio-gallegos` | Portada (la agenda pública todavía no está) |
+| `/rio-gallegos` | **Agenda**: hoy, el finde, los próximos 7 días y más adelante (45 días). Filtros por categoría y "solo gratis" (`?cat=musica&gratis=1`) |
+| `/rio-gallegos/evento/{slug}` | Ficha del evento: cuándo, dónde, entrada, descripción y links a las fuentes. Con datos estructurados (schema.org `Event`) |
+| `/rio-gallegos/evento/{slug}/calendario.ics` | El evento para agendar en el calendario del teléfono |
 | `/rio-gallegos/plazas` | Mapa y lista de plazas, parques, juegos y jardines. Filtro por tipo, búsqueda y orden por cercanía |
 | `/rio-gallegos/cargar` | Formulario público "Cargá tu evento": sin registro, entra como pendiente |
 | `/admin/eventos` | **Panel** (pide login): moderar eventos pendientes, publicados y rechazados |
@@ -144,6 +146,13 @@ Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del Y
 - **Errores:** una fuente rota no frena a las demás. El error queda en el panel. Si el LLM falla, la nota se reintenta en la próxima corrida (hasta 3 veces). Si el modelo la rechaza, no se reintenta.
 - **Costo:** con Haiku 5.5 a USD 0,10 / 0,50 por millón de tokens, una nota típica (unos 2.000 tokens de entrada) cuesta alrededor de USD 0,0003. Por el prefiltro, solo una parte de las notas llega al LLM.
 
+## Agenda pública
+
+- Solo se ven eventos **publicados**. Cada uno aparece una vez, en el primer grupo que le toca: **Hoy**, **El finde** (el próximo viernes-domingo que tenga días después de hoy; un domingo es el de la semana que viene), **Próximos 7 días** y **Más adelante**.
+- Lo que ya empezó y sigue en curso (una muestra de varios días) va en "Hoy". Un evento con hora y sin fin se da por terminado a las 3 horas; sin hora, vale todo ese día.
+- La descripción es el resumen que escribe el modelo, no el texto de la nota. Siempre se linkea a la fuente original.
+- Sin JavaScript: los filtros son links.
+
 ## Formulario y moderación (fase 3)
 
 - **Formulario público** (`/{ciudad}/cargar`): cualquiera manda un evento sin registrarse. Entra siempre como **pendiente**, con confianza 0, y no se publica hasta que alguien lo aprueba. El contacto del organizador lo ve solo el admin.
@@ -174,6 +183,7 @@ Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del Y
 ```
 app/
   main.py            rutas web públicas (portada, plazas)
+  agenda.py          agenda: agrupado por día, ficha del evento y .ics
   formulario.py      "Cargá tu evento" (validación compartida con el panel)
   admin.py           panel /admin: login, moderación, edición y salud de fuentes
   seguridad.py       firmas HMAC, sesión, CSRF y límites contra abuso

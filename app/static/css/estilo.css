@@ -511,3 +511,78 @@ td .ico { width: 1em; height: 1em; }
 .datos dt { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--tinta-suave); }
 .datos dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .nota-original { background: #fff; border: var(--linea-fina); padding: .8rem; font-size: .9rem; white-space: pre-line; max-height: 28rem; overflow: auto; display: grid; gap: .5rem; }
+
+/* --------------------------------------------------------------------------
+   Agenda pública
+   -------------------------------------------------------------------------- */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hero__titulo--agenda { font-size: clamp(3.2rem, 12vw, 8.5rem); margin-bottom: .5rem; }
+
+.filtros-agenda { padding: 1.5rem 0 .5rem; }
+.filtros-agenda .chips { list-style: none; margin: 0; padding: 0; }
+.filtros-agenda .chip { text-decoration: none; color: var(--tinta); }
+.filtros-agenda .chip[aria-current="true"] { background: var(--tinta); color: var(--papel); }
+.filtros-agenda .chip[aria-current="true"] .chip__check { opacity: 1; }
+.chips__sep { margin-left: .5rem; padding-left: 1rem; border-left: var(--linea-fina); }
+@media (max-width: 520px) { .chips__sep { margin-left: 0; padding-left: 0; border-left: 0; } }
+
+.dia { margin-top: 2.5rem; }
+.dia__cabeza { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .3rem 1rem; border-bottom: var(--linea); padding-bottom: .5rem; }
+.dia__titulo { font-family: var(--display); font-weight: 900; font-stretch: 62%; text-transform: uppercase; font-size: clamp(2.6rem, 7vw, 4.5rem); line-height: .85; }
+.dia__bajada { font-family: var(--mono); font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+
+.eventos { list-style: none; margin: 0; padding: 0; display: grid; }
+@media (min-width: 900px) { .eventos { grid-template-columns: 1fr 1fr; column-gap: 2rem; } }
+.ev { display: grid; grid-template-columns: 4.2rem 1fr; gap: 1rem; padding: 1.1rem 0; border-bottom: var(--linea-fina); }
+.ev__fecha { display: grid; justify-items: center; align-content: start; border: var(--linea-fina); background: #fff; padding: .35rem 0 .25rem; box-shadow: 4px 4px 0 var(--tinta); height: fit-content; }
+.ev__dia { font-family: var(--mono); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.ev__num { font-family: var(--display); font-weight: 900; font-stretch: 62%; font-size: 2.4rem; line-height: .9; }
+.ev__cuerpo { min-width: 0; }
+.ev__hora { font-family: var(--mono); font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.ev__titulo { font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: 1.5rem; line-height: 1.05; margin-top: .25rem; overflow-wrap: anywhere; }
+.ev__titulo a { color: var(--tinta); text-decoration: none; }
+.ev__titulo a:hover { text-decoration: underline; text-decoration-color: var(--oxido); text-decoration-thickness: 4px; }
+.ev__lugar { display: flex; gap: .4rem; align-items: flex-start; margin-top: .4rem; color: var(--tinta-suave); font-weight: 600; font-stretch: 90%; }
+.ev__lugar .ico { margin-top: .2rem; }
+.ev__etiquetas { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .55rem; }
+
+/* Categoría: siempre con texto; el color es refuerzo */
+.cat, .gratis { display: inline-flex; align-items: center; gap: .3rem; font-family: var(--mono); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .12rem .45rem; border: var(--linea-fina); }
+.gratis { background: var(--tinta); color: var(--papel); }
+.gratis .ico { width: .9em; height: .9em; }
+.cat--musica, .cat-fondo--musica { background: var(--lupino); }
+.cat--teatro, .cat-fondo--teatro { background: var(--lenga); }
+.cat--cine, .cat-fondo--cine { background: var(--glaciar); }
+.cat--feria, .cat-fondo--feria { background: var(--coiron); }
+.cat--deporte, .cat-fondo--deporte { background: var(--mata); }
+.cat--taller, .cat-fondo--taller { background: var(--glaciar); }
+.cat--muestra, .cat-fondo--muestra { background: var(--lupino); }
+.cat--infantil, .cat-fondo--infantil { background: var(--coiron); }
+.cat--gastronomia, .cat-fondo--gastronomia { background: var(--lenga); }
+.cat--otro, .cat-fondo--otro { background: var(--papel-2); }
+
+.agenda-vacia { margin-top: 2rem; border: var(--linea); background: #fff; padding: 1.5rem; display: grid; gap: .8rem; justify-items: start; box-shadow: 8px 8px 0 var(--tinta); }
+.agenda-vacia__titulo { font-family: var(--display); font-weight: 900; font-stretch: 62%; text-transform: uppercase; font-size: clamp(2rem, 6vw, 3.2rem); line-height: .9; }
+
+.seccion--cargar { background: var(--coiron); }
+.seccion--cargar:hover { background: var(--lupino); color: var(--tinta); }
+.seccion--cargar:hover .seccion__estado .ico { transform: translateX(6px); }
+
+/* Ficha del evento */
+.banda--ficha { color: var(--tinta); }
+.banda--ficha a { color: var(--tinta); }
+.banda--ficha .banda__titulo { text-shadow: .04em .035em 0 var(--papel); }
+.ficha { display: grid; gap: 2rem; padding-top: 2rem; }
+@media (min-width: 1000px) { .ficha { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; gap: 3rem; } }
+.ficha__datos { margin: 0; display: grid; gap: 0; border: var(--linea); background: #fff; }
+@media (min-width: 700px) { .ficha__datos { grid-template-columns: repeat(3, 1fr); } }
+.ficha__datos > div { padding: 1rem 1.1rem; }
+.ficha__datos > div + div { border-top: var(--linea-fina); }
+@media (min-width: 700px) { .ficha__datos > div + div { border-top: 0; border-left: var(--linea-fina); } }
+.ficha__datos dt { display: flex; align-items: center; gap: .4rem; font-family: var(--mono); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
+.ficha__datos dd { margin: 0; font-size: 1.1rem; line-height: 1.35; overflow-wrap: anywhere; }
+.ficha__desc { margin-top: 1.75rem; font-size: 1.2rem; line-height: 1.5; max-width: 60ch; }
+.ficha .acciones { margin-top: 1.75rem; }
+.ficha .aviso { margin: 0 0 1.25rem; }
+.ficha__lado { display: grid; gap: .9rem; }
+.ficha__fuentes { margin: 0; padding-left: 1.1rem; display: grid; gap: .35rem; font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }

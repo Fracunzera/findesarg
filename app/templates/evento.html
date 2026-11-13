@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% set DIAS_L = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo") %}
+{% set MESES_L = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre") %}
+{% set fecha_txt = DIAS_L[inicio_local.weekday()] ~ " " ~ inicio_local.day ~ " de " ~ MESES_L[inicio_local.month - 1] %}
+{% block titulo %}{{ ev.titulo }} · {{ fecha_txt }} · {{ SITIO_NOMBRE }}{% endblock %}
+{% block descripcion %}{{ ev.titulo }}, {{ fecha_txt }}{% if ev.lugar_texto %} en {{ ev.lugar_texto }}{% endif %}, {{ ciudad.nombre }}.{% if ev.descripcion %} {{ ev.descripcion | truncate(140) }}{% endif %}{% endblock %}
+{% block head %}
+{% if paso %}<meta name="robots" content="noindex">{% endif %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org", "@type": "Event", "name": ev.titulo,
+  "startDate": (inicio_local.isoformat() if ev.hora_confirmada else inicio_local.date().isoformat()),
+  "endDate": (fin_local.isoformat() if fin_local else None),
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "description": ev.descripcion,
+  "isAccessibleForFree": ev.gratis,
+  "location": {"@type": "Place", "name": ev.lugar_texto or ciudad.nombre,
+               "address": {"@type": "PostalAddress", "addressLocality": ciudad.nombre, "addressRegion": ciudad.provincia, "addressCountry": "AR"}},
+} | tojson }}</script>
+{% endblock %}
+{% block contenido %}
+<article>
+  <section class="banda banda--ficha cat-fondo--{{ ev.categoria }}">
+    <div class="contenedor banda__grilla">
+      <div>
+        <p class="volanta"><a href="/{{ ciudad.slug }}">← Agenda</a> · {{ CATEGORIAS.get(ev.categoria, "Otro") }}</p>
+        <h1 class="banda__titulo banda__titulo--largo">{{ ev.titulo }}</h1>
+      </div>
+    </div>
+  </section>
+
+  <div class="contenedor ficha">
+    <div class="ficha__principal">
+      {% if paso %}<p class="aviso">{{ ico("i-reloj") }} <span>Este evento ya pasó.</span></p>{% endif %}
+      <dl class="ficha__datos">
+        <div>
+          <dt>{{ ico("i-reloj") }} Cuándo</dt>
+          <dd><strong>{{ fecha_txt | capitalize }}</strong>
+            {% if ev.hora_confirmada %}<br>{{ "%02d:%02d" | format(inicio_local.hour, inicio_local.minute) }} h{% if fin_local %} a {{ "%02d:%02d" | format(fin_local.hour, fin_local.minute) }} h{% if fin_local.date() != inicio_local.date() %} ({{ DIAS_L[fin_local.weekday()] }} {{ fin_local.day }}){% endif %}{% endif %}
+            {% else %}<br><em>Horario a confirmar</em>{% if fin_local and fin_local.date() != inicio_local.date() %}<br>hasta el {{ DIAS_L[fin_local.weekday()] }} {{ fin_local.day }}{% endif %}{% endif %}</dd>
+        </div>
+        <div>
+          <dt>{{ ico("i-pin") }} Dónde</dt>
+          <dd><strong>{{ ev.lugar_texto or "A confirmar" }}</strong>
+            {% if punto %}<br><a href="https://www.openstreetmap.org/?mlat={{ '%.6f' | format(punto.y) }}&amp;mlon={{ '%.6f' | format(punto.x) }}#map=17/{{ '%.6f' | format(punto.y) }}/{{ '%.6f' | format(punto.x) }}" rel="noopener">Ver en el mapa</a>
+            {% elif ev.lugar_texto %}<br><a href="https://www.openstreetmap.org/search?query={{ (ev.lugar_texto ~ ', ' ~ ciudad.nombre) | urlencode }}" rel="noopener">Buscar en el mapa</a>{% endif %}</dd>
+        </div>
+        <div>
+          <dt>{{ ico("i-check") }} Entrada</dt>
+          <dd>{% if ev.gratis %}<strong>Gratis</strong>{% if ev.precio_texto %} · {{ ev.precio_texto }}{% endif %}
+            {% elif ev.precio_texto %}{{ ev.precio_texto }}{% elif ev.gratis is false %}Paga{% else %}Sin datos{% endif %}</dd>
+        </div>
+      </dl>
+
+      {% if ev.descripcion %}<p class="ficha__desc">{{ ev.descripcion }}</p>{% endif %}
+
+      {% if not paso %}
+      <p class="acciones">
+        <a class="boton" href="/{{ ciudad.slug }}/evento/{{ ev.slug }}/calendario.ics">{{ ico("i-mas") }} Agendar</a>
+      </p>
+      {% endif %}
+    </div>
+
+    <aside class="ficha__lado" aria-label="Fuentes">
+      <h2 class="lista__titulo">De dónde sale</h2>
+      {% if fuente and fuente.tipo == "formulario" %}
+      <p>Lo cargaron los organizadores y lo revisamos antes de publicarlo.</p>
+      {% elif fuente %}
+      <p>Lo encontramos en <strong>{{ fuente.nombre }}</strong>. Antes de ir, chequeá en la fuente por si cambió algo.</p>
+      {% endif %}
+      {% if ev.url_origen or ev.urls_alternativas %}
+      <ul class="ficha__fuentes">
+        {% for u in [ev.url_origen] + (ev.urls_alternativas or []) if u %}
+        <li><a href="{{ u }}" rel="noopener nofollow">{{ u | replace("https://", "") | replace("http://", "") | replace("www.", "") | truncate(48) }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <p class="ayuda">¿Algún dato está mal? Mandanos la corrección desde <a href="/{{ ciudad.slug }}/cargar">el formulario</a>.</p>
+    </aside>
+  </div>
+</article>
+{% endblock %}

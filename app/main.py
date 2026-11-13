@@ -7,7 +7,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app import admin, formulario
+from app import admin, agenda, formulario
 from app.db import get_db
 from app.models import Ciudad, Lugar
 from app.plantillas import BASE, TIPOS_ESPACIO_VERDE, templates
@@ -17,6 +17,7 @@ app.mount("/static", StaticFiles(directory=BASE / "static"), name="static")
 # Antes que /{slug}: si no, "/admin" se tomaría como una ciudad.
 app.include_router(admin.router)
 app.include_router(formulario.router)
+app.include_router(agenda.router)
 
 
 def obtener_ciudad(db: Session, slug: str) -> Ciudad:
@@ -56,16 +57,22 @@ def inicio(db: Session = Depends(get_db)):
 
 
 @app.get("/{slug}", response_class=HTMLResponse)
-def portada(request: Request, slug: str, db: Session = Depends(get_db)):
+def portada(
+    request: Request,
+    slug: str,
+    cat: str = Query("", max_length=32),
+    gratis: str = Query("", max_length=2),
+    db: Session = Depends(get_db),
+):
     ciudad = obtener_ciudad(db, slug)
     cant_lugares = db.scalar(
         select(func.count()).select_from(Lugar).where(
             Lugar.ciudad_id == ciudad.id, Lugar.tipo.in_(TIPOS_ESPACIO_VERDE)
         )
     )
-    return templates.TemplateResponse(
-        request, "portada.html", {"ciudad": ciudad, "cant_lugares": cant_lugares}
-    )
+    contexto = {"ciudad": ciudad, "cant_lugares": cant_lugares,
+                **agenda.datos_portada(db, ciudad, cat, gratis == "1")}
+    return templates.TemplateResponse(request, "portada.html", contexto)
 
 
 @app.get("/{slug}/plazas", response_class=HTMLResponse)

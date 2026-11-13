@@ -1,35 +1,61 @@
 {% extends "base.html" %}
 {% from "macros.html" import ico %}
 {% block titulo %}Qué hacer en {{ ciudad.nombre }} · {{ SITIO_NOMBRE }}{% endblock %}
+{% block descripcion %}Agenda de {{ ciudad.nombre }}: qué hacer hoy, el finde y esta semana. Recitales, ferias, teatro, talleres y más.{% endblock %}
 {% block contenido %}
-<section class="hero">
+<section class="hero hero--agenda">
   <div class="contenedor hero__grilla">
     <p class="volanta">Agenda abierta · {{ ciudad.provincia }}</p>
-    <h1 class="hero__titulo">
+    <h1 class="hero__titulo hero__titulo--agenda">
       <span>Qué hacer</span>
       <span>en {{ ciudad.nombre }}</span>
     </h1>
-    <div class="hero__pie">
-      <p class="hero__bajada">Recitales, ferias, teatro, talleres y todo lo que pasa en la ciudad. Más las plazas para salir a tomar aire cuando el viento afloja.</p>
-      <aside class="calco" aria-label="Aviso">
-        <p class="calco__titulo">En armado</p>
-        <p>La agenda de hoy, del finde y de los próximos 7 días llega muy pronto.</p>
-      </aside>
-    </div>
   </div>
 </section>
 
-<section class="secciones contenedor" aria-label="Secciones">
-  <article class="seccion seccion--agenda">
-    <p class="seccion__num">01</p>
-    <h2 class="seccion__titulo">Agenda</h2>
-    <p>Eventos de diarios locales, del municipio y de organizadores que los mandan. Siempre con link a la fuente original.</p>
-    <p class="seccion__estado">{{ ico("i-reloj") }} Próximamente</p>
-    <p><a class="boton boton--coiron" href="/{{ ciudad.slug }}/cargar">{{ ico("i-mas") }} Cargá tu evento</a></p>
-  </article>
+<div class="contenedor">
+  <nav class="filtros-agenda" aria-label="Filtrar la agenda">
+    {% set q_gratis = "&gratis=1" if gratis else "" %}
+    <p class="etiqueta">Qué tipo</p>
+    <ul class="chips" role="list">
+      <li><a class="chip" href="/{{ ciudad.slug }}{{ '?gratis=1' if gratis }}" {% if not categoria %}aria-current="true"{% endif %}>{{ ico("i-check", "ico chip__check") }}<span>Todo</span></a></li>
+      {% for c in categorias_con_eventos %}
+      <li><a class="chip" href="/{{ ciudad.slug }}?cat={{ c }}{{ q_gratis }}" {% if categoria == c %}aria-current="true"{% endif %}>{{ ico("i-check", "ico chip__check") }}<span>{{ CATEGORIAS[c] }}</span></a></li>
+      {% endfor %}
+      <li class="chips__sep"><a class="chip" href="/{{ ciudad.slug }}?{{ 'cat=' ~ categoria ~ '&' if categoria }}{{ '' if gratis else 'gratis=1' }}" {% if gratis %}aria-current="true"{% endif %}>{{ ico("i-check", "ico chip__check") }}<span>Solo gratis</span></a></li>
+    </ul>
+  </nav>
 
+  {% if total == 0 %}
+  <div class="agenda-vacia">
+    <p class="agenda-vacia__titulo">{% if categoria or gratis %}No hay nada con ese filtro{% else %}Todavía no hay eventos cargados{% endif %}</p>
+    <p>{% if categoria or gratis %}<a href="/{{ ciudad.slug }}">Ver toda la agenda</a>, o{% else %}Estamos sumando fuentes. Mientras tanto,{% endif %} si organizás algo, cargalo vos.</p>
+    <p><a class="boton boton--coiron" href="/{{ ciudad.slug }}/cargar">{{ ico("i-mas") }} Cargá tu evento</a></p>
+  </div>
+  {% endif %}
+
+  {% for g in grupos if g.eventos %}
+  <section class="dia" aria-labelledby="g-{{ g.clave }}">
+    <header class="dia__cabeza">
+      <h2 class="dia__titulo" id="g-{{ g.clave }}">{{ g.titulo }}</h2>
+      <p class="dia__bajada">{{ g.bajada }} · {{ g.eventos | length }} evento{{ "s" if g.eventos | length != 1 }}</p>
+    </header>
+    <ul class="eventos" role="list">
+      {% for ev in g.eventos %}{% include "parciales/tarjeta_evento.html" %}{% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+</div>
+
+<section class="secciones contenedor" aria-label="Más">
+  <a class="seccion seccion--cargar" href="/{{ ciudad.slug }}/cargar">
+    <p class="seccion__num">¿Organizás algo?</p>
+    <h2 class="seccion__titulo">Cargá tu evento</h2>
+    <p>Es gratis y no hace falta registrarse. Lo revisamos y lo sumamos a la agenda.</p>
+    <p class="seccion__estado">Cargar {{ ico("i-flecha") }}</p>
+  </a>
   <a class="seccion seccion--plazas" href="/{{ ciudad.slug }}/plazas">
-    <p class="seccion__num">02</p>
+    <p class="seccion__num">Al aire libre</p>
     <h2 class="seccion__titulo">Plazas</h2>
     {% if cant_lugares %}
     <p class="seccion__cifra"><span class="cifra">{{ cant_lugares }}</span> plazas, parques y juegos en el mapa</p>
