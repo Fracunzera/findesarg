@@ -1,3 +1,22 @@
 {% macro ico(id, clase="ico") -%}
 <svg class="{{ clase }}" aria-hidden="true" focusable="false"><use href="#{{ id }}"/></svg>
 {%- endmacro %}
+
+{# Campo de formulario con etiqueta, ayuda y error asociados (aria-describedby). #}
+{% macro campo(nombre, etiqueta, v, errores, tipo="text", ayuda="", requerido=false, attrs="") -%}
+{% set err = errores.get(nombre) %}
+<div class="campo{% if err %} campo--error{% endif %}">
+  <label class="etiqueta" for="c-{{ nombre }}">{{ etiqueta }}{% if requerido %} <span class="req" aria-hidden="true">*</span>{% else %} <span class="opcional">(opcional)</span>{% endif %}</label>
+  {% if tipo == "textarea" %}
+  <textarea id="c-{{ nombre }}" name="{{ nombre }}" rows="5" {% if requerido %}required{% endif %}
+    {% if ayuda or err %}aria-describedby="{% if ayuda %}a-{{ nombre }}{% endif %} {% if err %}e-{{ nombre }}{% endif %}"{% endif %}
+    {% if err %}aria-invalid="true"{% endif %} {{ attrs | safe }}>{{ v.get(nombre, "") }}</textarea>
+  {% else %}
+  <input type="{{ tipo }}" id="c-{{ nombre }}" name="{{ nombre }}" value="{{ v.get(nombre, '') }}" {% if requerido %}required{% endif %}
+    {% if ayuda or err %}aria-describedby="{% if ayuda %}a-{{ nombre }}{% endif %} {% if err %}e-{{ nombre }}{% endif %}"{% endif %}
+    {% if err %}aria-invalid="true"{% endif %} {{ attrs | safe }}>
+  {% endif %}
+  {% if ayuda %}<p class="ayuda" id="a-{{ nombre }}">{{ ayuda }}</p>{% endif %}
+  {% if err %}<p class="campo__error" id="e-{{ nombre }}">{{ ico("i-error") }} {{ err }}</p>{% endif %}
+</div>
+{%- endmacro %}

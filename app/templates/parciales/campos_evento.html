@@ -1,0 +1,44 @@
+{% from "macros.html" import campo, ico %}
+{# Necesita: v (valores), errores, y opcionalmente hoy / max_fecha para el selector de fecha #}
+<fieldset class="grupo">
+  <legend class="grupo__titulo">Qué y cuándo</legend>
+  {{ campo("titulo", "Nombre del evento", v, errores, requerido=true, attrs='maxlength="200" autocomplete="off"') }}
+  <div class="campos-fila">
+    {{ campo("fecha", "Fecha", v, errores, tipo="date", requerido=true,
+             attrs=('min="' ~ hoy ~ '" ' if hoy else '') ~ ('max="' ~ max_fecha ~ '"' if max_fecha else '')) }}
+    {{ campo("hora", "Hora de inicio", v, errores, tipo="time", ayuda="Si todavía no la sabés, dejala vacía.") }}
+    {{ campo("hora_fin", "Hora de fin", v, errores, tipo="time") }}
+  </div>
+  {% set err = errores.get("categoria") %}
+  <div class="campo{% if err %} campo--error{% endif %}">
+    <label class="etiqueta" for="c-categoria">Categoría <span class="req" aria-hidden="true">*</span></label>
+    <select id="c-categoria" name="categoria" required {% if err %}aria-invalid="true" aria-describedby="e-categoria"{% endif %}>
+      {% for clave, etiqueta in CATEGORIAS.items() %}
+      <option value="{{ clave }}" {% if v.get("categoria", "otro") == clave %}selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+    {% if err %}<p class="campo__error" id="e-categoria">{{ ico("i-error") }} {{ err }}</p>{% endif %}
+  </div>
+</fieldset>
+
+<fieldset class="grupo">
+  <legend class="grupo__titulo">Dónde y cuánto sale</legend>
+  {{ campo("lugar", "Lugar", v, errores, requerido=true, ayuda="Nombre del lugar o dirección. Ej.: Complejo Cultural Santa Cruz, Ramón y Cajal 51.", attrs='maxlength="200"') }}
+  <fieldset class="campo radios">
+    <legend class="etiqueta">¿Es gratis? <span class="opcional">(opcional)</span></legend>
+    <div class="chips">
+      {% for valor, texto in (("si", "Sí, entrada libre"), ("no", "No, se paga"), ("", "No sé")) %}
+      <label class="chip"><input type="radio" name="gratis" value="{{ valor }}" {% if v.get("gratis", "") == valor %}checked{% endif %}>
+        {{ ico("i-check", "ico chip__check") }}<span>{{ texto }}</span></label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {{ campo("precio", "Precio o cómo conseguir entradas", v, errores, ayuda="Ej.: $5000 anticipada, $7000 en puerta.", attrs='maxlength="200"') }}
+</fieldset>
+
+<fieldset class="grupo">
+  <legend class="grupo__titulo">Más datos</legend>
+  {{ campo("descripcion", "Descripción", v, errores, tipo="textarea", attrs='maxlength="2000"') }}
+  {{ campo("enlace", "Link para más info", v, errores, tipo="url", ayuda="Una página, un posteo o donde se venden las entradas.", attrs='maxlength="500" placeholder="https://"') }}
+  {{ campo("contacto", "Tu contacto", v, errores, ayuda="Mail o teléfono, por si tenemos que consultarte algo. No se publica.", attrs='maxlength="200" autocomplete="email"') }}
+</fieldset>

@@ -21,12 +21,13 @@
       <a class="logo" href="/{% if ciudad %}{{ ciudad.slug }}{% endif %}" aria-label="{{ SITIO_NOMBRE }}: inicio">
         <span class="logo__que">{{ LOGO[0] }}</span>{% if LOGO[1] %}<span class="logo__hacer">{{ LOGO[1] }}</span>{% endif %}
       </a>
-      {% if ciudad %}
+      {% block nav %}{% if ciudad %}
       <nav class="nav" aria-label="Principal">
         <a href="/{{ ciudad.slug }}" {% if request.url.path == '/' ~ ciudad.slug %}aria-current="page"{% endif %}>Agenda</a>
         <a href="/{{ ciudad.slug }}/plazas" {% if request.url.path.endswith('/plazas') %}aria-current="page"{% endif %}>Plazas</a>
+        <a href="/{{ ciudad.slug }}/cargar" {% if '/cargar' in request.url.path %}aria-current="page"{% endif %}>Cargar</a>
       </nav>
-      {% endif %}
+      {% endif %}{% endblock %}
     </div>
     <div class="cinta" role="presentation">
       <div class="contenedor cinta__fila">
@@ -45,7 +46,7 @@
       <p class="pie__marca">{{ LOGO[0] }}{% if LOGO[1] %}<br>{{ LOGO[1] }}{% endif %}</p>
       <div class="pie__texto">
         {% block pie %}{% endblock %}
-        <p>Agenda abierta, hecha en {% if ciudad %}{{ ciudad.nombre }}{% else %}la Patagonia{% endif %}. Sin scrapear redes sociales. <a href="/estado/fuentes">Estado de las fuentes</a>.</p>
+        <p>Agenda abierta, hecha en {% if ciudad %}{{ ciudad.nombre }}{% else %}la Patagonia{% endif %}. Sin scrapear redes sociales.{% if ciudad %} ¿Organizás algo? <a href="/{{ ciudad.slug }}/cargar">Cargá tu evento</a>.{% endif %}</p>
         <p>Lugares © <a href="https://www.openstreetmap.org/copyright">colaboradores de OpenStreetMap</a> (ODbL).
           Tipografías Archivo y Chivo Mono de <a href="https://www.omnibus-type.com/">Omnibus-Type</a>, Buenos Aires.</p>
       </div>

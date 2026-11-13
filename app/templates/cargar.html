@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Cargá tu evento en {{ ciudad.nombre }} · {{ SITIO_NOMBRE }}{% endblock %}
+{% block descripcion %}¿Organizás algo en {{ ciudad.nombre }}? Mandanos los datos y lo sumamos a la agenda.{% endblock %}
+{% block contenido %}
+<section class="banda banda--coiron">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">03 · Para organizadores</p>
+      <h1 class="banda__titulo">Cargá tu evento</h1>
+    </div>
+    <p class="banda__bajada">Es gratis y no hace falta registrarse. Lo revisamos y, si está todo bien, aparece en la agenda.</p>
+  </div>
+</section>
+
+<div class="contenedor contenedor--angosto">
+  {% if aviso %}
+  <p class="aviso" role="alert">{{ ico("i-aviso") }} <span>{{ aviso }}</span></p>
+  {% elif errores %}
+  <div class="aviso" role="alert" tabindex="-1" id="resumen-errores">
+    {{ ico("i-error") }}
+    <div>
+      <p><strong>Revisá {% if errores | length == 1 %}este dato{% else %}estos {{ errores | length }} datos{% endif %}:</strong></p>
+      <ul>{% for campo, msg in errores.items() %}<li><a href="#c-{{ campo }}">{{ msg }}</a></li>{% endfor %}</ul>
+    </div>
+  </div>
+  {% endif %}
+
+  <form class="formulario" method="post" action="/{{ ciudad.slug }}/cargar" novalidate>
+    <input type="hidden" name="marca" value="{{ marca }}">
+    {# Campo trampa: oculto para personas (y para lectores de pantalla), los bots lo completan #}
+    <div class="trampa" aria-hidden="true">
+      <label for="c-{{ trampa }}">No completar</label>
+      <input type="text" id="c-{{ trampa }}" name="{{ trampa }}" tabindex="-1" autocomplete="off">
+    </div>
+
+    {% include "parciales/campos_evento.html" %}
+
+    <div class="formulario__acciones">
+      <button type="submit" class="boton">{{ ico("i-flecha") }} Mandar evento</button>
+      <p class="ayuda">Los campos con <span class="req">*</span> son obligatorios. Lo publicamos después de revisarlo.</p>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if errores and not aviso %}<script>document.getElementById("resumen-errores").focus()</script>{% endif %}
+{% endblock %}

@@ -123,11 +123,15 @@ def guardar_evento(db: Session, ciudad: Ciudad, fuente: Fuente, item: ItemCrudo 
     tz = ZoneInfo(ciudad.timezone)
     datos = dedup.DatosDedup(ne.titulo, ne.inicio, ne.lugar_texto)
 
+    # Los rechazados también cuentan: si otra fuente trae el mismo evento, no vuelve a
+    # aparecer como pendiente. Lo que llegó por el formulario y nadie revisó no se toca:
+    # un envío anónimo no se publica solo porque un diario trae algo parecido.
+    de_formulario = select(Fuente.id).where(Fuente.tipo == "formulario")
     candidatos = db.scalars(
         select(Evento).where(
             Evento.ciudad_id == ciudad.id,
-            Evento.estado != "rechazado",
             Evento.inicio.between(ne.inicio - timedelta(days=1), ne.inicio + timedelta(days=1)),
+            ~((Evento.estado == "pendiente") & Evento.fuente_id.in_(de_formulario)),
         )
     ).all()
     for ev in candidatos:
@@ -164,6 +168,10 @@ def guardar_evento(db: Session, ciudad: Ciudad, fuente: Fuente, item: ItemCrudo 
 def _fusionar(ev: Evento, ne: NuevoEvento, tz: ZoneInfo, ahora: datetime | None) -> None:
     """Se queda con el registro más completo y guarda las dos URLs de origen."""
     todas = set(ev.urls_alternativas or []) | {u for u in (ev.url_origen, ne.url_origen) if u}
+    if ev.moderado is not None:
+        # Ya lo revisó (y quizás corrigió) alguien: solo sumamos la URL.
+        ev.urls_alternativas = sorted(todas - {ev.url_origen})
+        return
     if dedup.completitud(ne) > dedup.completitud(ev):
         # El nuevo es mejor: pisa los datos principales (la URL vieja pasa a alternativa).
         for campo in ("titulo", "inicio", "fin", "hora_confirmada", "categoria", "url_origen"):
@@ -176,9 +184,8 @@ def _fusionar(ev: Evento, ne: NuevoEvento, tz: ZoneInfo, ahora: datetime | None)
     if ev.gratis is None and ne.gratis is not None:
         ev.gratis = ne.gratis
     ev.confianza = max(ev.confianza or 0, ne.confianza)
-    # Dos fuentes que coinciden suben la confianza, pero no se publica solo por eso
-    # si lo moderaron a mano (rechazado no llega acá; publicado se mantiene).
-    if ev.estado == "pendiente":
+    # Dos fuentes que coinciden suben la confianza. Lo moderado a mano no cambia de estado.
+    if ev.estado == "pendiente" and ev.moderado is None:
         ev.estado = decidir_estado(ev.confianza, ev.inicio, ev.fin, ev.hora_confirmada, tz, ahora)
 
 

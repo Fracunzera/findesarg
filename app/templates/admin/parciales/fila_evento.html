@@ -1,0 +1,40 @@
+{% from "macros.html" import ico %}
+{% set es = ESTADOS_EVENTO[ev.estado] %}{% set c = ciudades.get(ev.ciudad_id) %}
+{% set tz = c.timezone if c else "America/Argentina/Rio_Gallegos" %}
+<li class="mod{% if recien %} mod--recien{% endif %}" id="ev-{{ ev.id }}">
+  <div class="mod__cuerpo">
+    <p class="mod__cuando">{{ ev | cuando(tz) }}{% if ev.fin %} → {{ (ev.fin | hora_local(tz))[-5:] }}{% endif %}</p>
+    <h2 class="mod__titulo"><a href="/admin/eventos/{{ ev.id }}">{{ ev.titulo }}</a></h2>
+    <p class="mod__meta">
+      <span class="etiqueta-tipo">{{ CATEGORIAS.get(ev.categoria, ev.categoria) }}</span>
+      <span>{{ ico("i-pin") }} {{ ev.lugar_texto or "Sin lugar" }}</span>
+      {% if ev.gratis %}<span>Gratis</span>{% elif ev.precio_texto %}<span>{{ ev.precio_texto | truncate(40) }}</span>{% endif %}
+    </p>
+    <p class="mod__origen ayuda">
+      {% if fuente and fuente.tipo == "formulario" %}
+        Lo cargó un organizador{% if ev.contacto %} · contacto: {{ ev.contacto }}{% endif %}
+      {% else %}
+        {{ fuente.nombre if fuente else "Sin fuente" }} · confianza {{ "%.2f" | format(ev.confianza) }}
+      {% endif %}
+      {% if ev.url_origen %} · <a href="{{ ev.url_origen }}" rel="noopener noreferrer nofollow" target="_blank">ver origen</a>{% endif %}
+      {% if ev.urls_alternativas %} · +{{ ev.urls_alternativas | length }} fuente(s){% endif %}
+    </p>
+    {% if ev.descripcion %}<p class="mod__desc">{{ ev.descripcion | truncate(220) }}</p>{% endif %}
+    {% for d in duplicados.get(ev.id, []) %}
+    <p class="mod__dup">{{ ico("i-duplicado") }} <span>¿Repetido? Se parece a <a href="/admin/eventos/{{ d.id }}">{{ d.titulo | truncate(60) }}</a> ({{ ESTADOS_EVENTO[d.estado].etiqueta | lower }})</span></p>
+    {% endfor %}
+  </div>
+  <div class="mod__acciones">
+    {% if recien %}
+    <p class="estado estado--{{ ev.estado }}" role="status">{{ ico(es.icono) }} {{ es.etiqueta }}</p>
+    {% endif %}
+    <form method="post" action="/admin/eventos/{{ ev.id }}/estado" hx-post="/admin/eventos/{{ ev.id }}/estado" hx-target="#ev-{{ ev.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="volver" value="{{ volver or '/admin/eventos' }}">
+      {% if ev.estado != "publicado" %}<button class="boton boton--chico boton--mata" name="accion" value="publicar">{{ ico("i-check") }} Publicar</button>{% endif %}
+      {% if ev.estado != "rechazado" %}<button class="boton boton--chico boton--lenga" name="accion" value="rechazar">{{ ico("i-error") }} Rechazar</button>{% endif %}
+      {% if ev.estado != "pendiente" %}<button class="boton boton--chico boton--papel" name="accion" value="pendiente">{{ ico("i-reloj") }} A pendientes</button>{% endif %}
+      <a class="boton boton--chico boton--papel" href="/admin/eventos/{{ ev.id }}">{{ ico("i-lapiz") }} Editar</a>
+    </form>
+  </div>
+</li>

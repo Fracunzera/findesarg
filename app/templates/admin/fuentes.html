@@ -1,7 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin/_base.html" %}
 {% from "macros.html" import ico %}
-{% block titulo %}Estado de las fuentes · {{ SITIO_NOMBRE }}{% endblock %}
-{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block titulo %}Fuentes · Panel · {{ SITIO_NOMBRE }}{% endblock %}
 {% block contenido %}
 <section class="banda banda--tinta">
   <div class="contenedor banda__grilla">
@@ -28,7 +27,7 @@
         <p class="estado estado--{{ x.estado }}">{{ ico(e.icono) }} {{ e.etiqueta }}</p>
         <h2 class="fuente__nombre">{{ x.f.nombre }}</h2>
         <p class="fuente__meta"><span class="etiqueta-tipo">{{ x.f.tipo }}</span>
-          <a href="{{ x.f.url }}" rel="noopener nofollow">{{ x.f.url | replace("https://", "") | truncate(60) }}</a></p>
+          <a href="{{ x.f.url }}" rel="noopener noreferrer nofollow">{{ x.f.url | replace("https://", "") | truncate(60) }}</a></p>
       </div>
       <dl class="fuente__datos">
         <div><dt>Última corrida</dt><dd>{{ x.f.ultima_corrida | hace }}</dd></div>
@@ -81,11 +80,11 @@
         {% for ev, fuente_nombre in eventos %}{% set es = ESTADOS_EVENTO[ev.estado] %}
         <tr>
           <td class="estado estado--{{ ev.estado }}">{{ ico(es.icono) }} {{ es.etiqueta }}</td>
-          <td><strong>{{ ev.titulo }}</strong> <span class="ayuda">· {{ ev.categoria }}</span>
+          <td><strong><a href="/admin/eventos/{{ ev.id }}">{{ ev.titulo }}</a></strong> <span class="ayuda">· {{ ev.categoria }}</span>
             {% if ev.urls_alternativas %}<br><span class="ayuda">+{{ ev.urls_alternativas | length }} fuente(s) más</span>{% endif %}</td>
-          <td>{% if ev.hora_confirmada %}{{ ev.inicio | hora_local }}{% else %}{{ (ev.inicio | hora_local)[:-6] }} · <em>Horario a confirmar</em>{% endif %}</td>
+          <td>{{ ev | cuando }}</td>
           <td>{{ ev.lugar_texto or "—" }}</td>
-          <td>{{ "%.2f" | format(ev.confianza) }}</td>
+          <td>{{ "%.2f" | format(ev.confianza) if ev.confianza else "—" }}</td>
           <td>{% if ev.url_origen %}<a href="{{ ev.url_origen }}" rel="noopener nofollow">{{ fuente_nombre or "Fuente" }}</a>{% else %}{{ fuente_nombre or "—" }}{% endif %}</td>
         </tr>
         {% endfor %}

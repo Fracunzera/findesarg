@@ -1,0 +1,64 @@
+{% extends "admin/_base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Editar evento · Panel · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta"><a href="/admin/eventos?estado={{ ev.estado }}">← Eventos</a> · #{{ ev.id }}</p>
+      <h1 class="banda__titulo banda__titulo--largo">{{ ev.titulo }}</h1>
+    </div>
+    <p class="estado estado--{{ ev.estado }}">{{ ico(ESTADOS_EVENTO[ev.estado].icono) }} {{ ESTADOS_EVENTO[ev.estado].etiqueta }}</p>
+  </div>
+</section>
+
+<div class="contenedor edicion">
+  <form class="formulario" method="post" action="/admin/eventos/{{ ev.id }}" novalidate>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if errores %}
+    <div class="aviso" role="alert">{{ ico("i-error") }}
+      <div><p><strong>Revisá estos datos:</strong></p>
+        <ul>{% for c, msg in errores.items() %}<li><a href="#c-{{ c }}">{{ msg }}</a></li>{% endfor %}</ul></div>
+    </div>
+    {% endif %}
+
+    {% include "parciales/campos_evento.html" %}
+
+    <fieldset class="grupo">
+      <legend class="grupo__titulo">Estado</legend>
+      <div class="chips">
+        {% for clave, e in ESTADOS_EVENTO.items() %}
+        <label class="chip"><input type="radio" name="estado" value="{{ clave }}" {% if v.get("estado") == clave %}checked{% endif %}>
+          {{ ico("i-check", "ico chip__check") }}<span>{{ e.etiqueta }}</span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="formulario__acciones">
+      <button type="submit" class="boton">{{ ico("i-check") }} Guardar</button>
+      <a href="/admin/eventos?estado={{ ev.estado }}">Cancelar</a>
+    </div>
+  </form>
+
+  <aside class="edicion__lado" aria-label="De dónde salió">
+    <h2 class="lista__titulo">Origen</h2>
+    <dl class="datos">
+      <div><dt>Fuente</dt><dd>{{ fuente.nombre if fuente else "—" }}{% if fuente %} <span class="etiqueta-tipo">{{ fuente.tipo }}</span>{% endif %}</dd></div>
+      {% if fuente and fuente.tipo != "formulario" %}<div><dt>Confianza del LLM</dt><dd>{{ "%.2f" | format(ev.confianza) }}</dd></div>{% endif %}
+      <div><dt>Detectado</dt><dd>{{ ev.creado | hace }}</dd></div>
+      <div><dt>Revisado</dt><dd>{{ ev.moderado | hace if ev.moderado else "Todavía no" }}</dd></div>
+      {% if ev.url_origen %}<div><dt>Link</dt><dd><a href="{{ ev.url_origen }}" rel="noopener noreferrer nofollow" target="_blank">{{ ev.url_origen | replace("https://", "") | truncate(50) }}</a></dd></div>{% endif %}
+      {% for u in ev.urls_alternativas or [] %}<div><dt>También en</dt><dd><a href="{{ u }}" rel="noopener noreferrer nofollow" target="_blank">{{ u | replace("https://", "") | truncate(50) }}</a></dd></div>{% endfor %}
+    </dl>
+    {% for d in duplicados %}
+    <p class="mod__dup">{{ ico("i-duplicado") }} <span>¿Repetido? Se parece a <a href="/admin/eventos/{{ d.id }}">{{ d.titulo | truncate(60) }}</a> ({{ ESTADOS_EVENTO[d.estado].etiqueta | lower }}). Si es el mismo, rechazá uno de los dos.</span></p>
+    {% endfor %}
+    {% if item and item.texto %}
+    <details class="corridas">
+      <summary>Texto de la nota original</summary>
+      <div class="nota-original">{% if item.titulo %}<p><strong>{{ item.titulo }}</strong></p>{% endif %}<p>{{ item.texto | truncate(4000) }}</p></div>
+    </details>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

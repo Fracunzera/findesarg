@@ -1,0 +1,53 @@
+{% extends "admin/_base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Eventos · Panel · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">Moderación</p>
+      <h1 class="banda__titulo">Eventos</h1>
+    </div>
+    <dl class="banda__cifras banda__cifras--3">
+      {% for clave in ("pendiente", "publicado", "rechazado") %}
+      <div><dt>{{ ESTADOS_EVENTO[clave].etiqueta }}</dt><dd class="cifra">{{ conteos.get(clave, 0) }}</dd></div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+
+<div class="contenedor">
+  {% if ok %}<p class="aviso aviso--ok" role="status">{{ ico("i-ok") }} <span>{{ ok }}</span></p>{% endif %}
+
+  <form class="filtros filtros--admin" method="get" action="/admin/eventos">
+    <fieldset class="tipos">
+      <legend class="etiqueta">Estado</legend>
+      <div class="chips">
+        {% for clave in ("pendiente", "publicado", "rechazado") %}
+        <label class="chip"><input type="radio" name="estado" value="{{ clave }}" {% if estado == clave %}checked{% endif %} onchange="this.form.submit()">
+          {{ ico("i-check", "ico chip__check") }}<span>{{ ESTADOS_EVENTO[clave].etiqueta }} ({{ conteos.get(clave, 0) }})</span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <fieldset class="tipos">
+      <legend class="etiqueta">Cuándo</legend>
+      <div class="chips">
+        {% for clave, texto in (("proximos", "Hoy y próximos"), ("pasados", "Ya pasaron"), ("todos", "Todos")) %}
+        <label class="chip"><input type="radio" name="cuando" value="{{ clave }}" {% if cuando == clave %}checked{% endif %} onchange="this.form.submit()">
+          {{ ico("i-check", "ico chip__check") }}<span>{{ texto }}</span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <noscript><div class="filtros__acciones"><button type="submit" class="boton">Filtrar</button></div></noscript>
+  </form>
+
+  {% if not filas %}
+  <p class="vacio">{% if estado == "pendiente" %}No hay nada para revisar.{% else %}No hay eventos con este filtro.{% endif %}</p>
+  {% else %}
+  <ul class="moderacion" role="list">
+    {% for ev, fuente in filas %}{% include "admin/parciales/fila_evento.html" %}{% endfor %}
+  </ul>
+  {% if hay_mas %}<p class="ayuda">Se muestran los primeros 100.</p>{% endif %}
+  {% endif %}
+</div>
+{% endblock %}

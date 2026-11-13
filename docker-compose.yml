@@ -46,11 +46,6 @@ services:
       web:
         condition: service_healthy   # espera a que estén aplicadas las migraciones
 
-  bot:
-    <<: *app
-    # Fase 3. Por ahora es un placeholder que queda en espera.
-    command: python -m app.bot
-
 volumes:
   db_data:
   cache_html:

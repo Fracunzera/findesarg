@@ -1,0 +1,30 @@
+{% extends "admin/_base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Entrar al panel · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">Sala de máquinas</p>
+      <h1 class="banda__titulo">Entrar al panel</h1>
+    </div>
+  </div>
+</section>
+<div class="contenedor contenedor--angosto">
+  {% if error %}<p class="aviso" role="alert">{{ ico("i-error") }} <span>{{ error }}</span></p>{% endif %}
+  <form class="formulario formulario--login" method="post" action="/admin/entrar">
+    <input type="hidden" name="siguiente" value="{{ siguiente }}">
+    <div class="campo">
+      <label class="etiqueta" for="usuario">Usuario</label>
+      <input type="text" id="usuario" name="usuario" value="{{ usuario or '' }}" autocomplete="username" required autofocus>
+    </div>
+    <div class="campo">
+      <label class="etiqueta" for="clave">Clave</label>
+      <input type="password" id="clave" name="clave" autocomplete="current-password" required>
+    </div>
+    <div class="formulario__acciones">
+      <button type="submit" class="boton">{{ ico("i-flecha") }} Entrar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

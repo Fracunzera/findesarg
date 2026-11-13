@@ -400,3 +400,114 @@ th { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; let
 td .ico { width: 1em; height: 1em; }
 .eventos-recientes { margin: 2.5rem 0 1rem; }
 .tabla-eventos td:nth-child(3), .tabla-eventos td:nth-child(5) { white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
+   Cabecera con tres links: en pantallas chicas el nav baja a su propia fila
+   -------------------------------------------------------------------------- */
+.cabecera__fila { flex-wrap: wrap; }
+@media (max-width: 480px) {
+  .cabecera .nav { width: 100%; }
+  .cabecera .nav > * { flex: 1; justify-content: center; }
+}
+.nav__form { display: flex; margin: 0; border-left: var(--linea-fina); }
+.nav__form button {
+  font-family: var(--mono); font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  background: none; border: 0; color: var(--tinta); padding: .6rem .9rem; min-height: 44px; cursor: pointer; width: 100%;
+}
+.nav__form button:hover { background: var(--coiron); }
+
+/* --------------------------------------------------------------------------
+   Formularios (cargar evento, login, edición)
+   -------------------------------------------------------------------------- */
+.banda--coiron { background: var(--coiron); color: var(--tinta); }
+.banda--coiron .banda__titulo { text-shadow: .04em .035em 0 var(--papel); }
+.banda__bajada { font-size: 1.1rem; max-width: 34ch; font-stretch: 90%; }
+.banda__titulo--largo { font-size: clamp(2rem, 6vw, 4rem); max-width: 22ch; overflow-wrap: anywhere; }
+.banda--tinta a { color: var(--coiron); }
+.contenedor--angosto { max-width: 820px; }
+.hero__titulo--chico { font-size: clamp(3rem, 11vw, 8rem); }
+.acciones { display: flex; flex-wrap: wrap; gap: 1rem; }
+
+.formulario { display: grid; gap: 1.75rem; padding-top: 2rem; }
+.grupo { border: var(--linea); background: #fff; margin: 0; padding: 1.1rem 1.1rem 1.3rem; display: grid; gap: 1.1rem; min-width: 0; }
+.grupo__titulo {
+  font-family: var(--display); font-weight: 900; font-stretch: 70%; text-transform: uppercase;
+  font-size: 1.5rem; line-height: 1; background: var(--tinta); color: var(--papel); padding: .3rem .6rem;
+}
+.campo { display: grid; gap: .1rem; min-width: 0; border: 0; margin: 0; padding: 0; }
+.campos-fila { display: grid; gap: 1.1rem; }
+@media (min-width: 640px) { .campos-fila { grid-template-columns: 1.3fr 1fr 1fr; align-items: start; } }
+.req { color: var(--oxido); font-weight: 900; }
+.opcional { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--tinta-suave); }
+.campo .ayuda { margin-top: .3rem; }
+
+.formulario input[type="text"], .formulario input[type="url"], .formulario input[type="date"],
+.formulario input[type="time"], .formulario input[type="password"], .formulario select, .formulario textarea {
+  width: 100%; font: inherit; font-size: 1.05rem; color: var(--tinta); background: #fff;
+  border: var(--linea-fina); border-radius: 0; padding: .65rem .75rem; min-height: 50px;
+  -webkit-appearance: none; appearance: none;
+}
+.formulario select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--tinta) 50%), linear-gradient(135deg, var(--tinta) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 2.5rem;
+}
+.formulario textarea { min-height: 8rem; resize: vertical; line-height: 1.45; }
+.formulario input:focus, .formulario select:focus, .formulario textarea:focus { outline: 4px solid var(--foco); outline-offset: 0; }
+.campo--error input, .campo--error select, .campo--error textarea { border-color: var(--oxido); border-width: 3px; background: #fdf3ee; }
+.campo__error { display: flex; gap: .4rem; align-items: flex-start; margin-top: .35rem; font-weight: 700; font-size: .92rem; color: #8a2f12; }
+.campo__error .ico { margin-top: .15rem; }
+.radios .chips { margin-top: .1rem; }
+
+.formulario__acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+.formulario--login { max-width: 26rem; }
+
+/* El campo trampa queda fuera de la pantalla (no display:none: algunos bots lo detectan) */
+.trampa { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+.aviso { display: flex; gap: .6rem; align-items: flex-start; margin-top: 1.5rem; padding: .9rem 1rem; background: #f6ddd2; border: var(--linea-fina); border-left: 8px solid var(--oxido); font-weight: 600; }
+.aviso ul { margin: .4rem 0 0; padding-left: 1.1rem; font-weight: 400; }
+.aviso .ico { margin-top: .2rem; }
+.aviso:focus { outline: 4px solid var(--foco); outline-offset: 2px; }
+.aviso--ok { background: #e4ecd5; border-left-color: var(--mata); }
+
+/* --------------------------------------------------------------------------
+   Panel: moderación
+   -------------------------------------------------------------------------- */
+.banda__cifras--3 { grid-template-columns: repeat(3, auto); }
+@media (max-width: 560px) { .banda__cifras--3 { grid-template-columns: repeat(3, auto); gap: .5rem 1rem; } }
+.filtros--admin { grid-template-columns: none; }
+@media (min-width: 900px) { .filtros--admin { grid-template-columns: auto 1fr; } }
+
+.boton--chico { font-size: .78rem; padding: .45rem .7rem; min-height: 44px; box-shadow: 3px 3px 0 var(--tinta); }
+.boton--chico:hover { box-shadow: 4px 4px 0 var(--tinta); }
+.boton--mata { background: var(--mata); color: var(--tinta); }
+.boton--lenga { background: var(--lenga); color: var(--tinta); }
+.boton--papel { background: #fff; color: var(--tinta); }
+.boton--mata:hover, .boton--lenga:hover, .boton--papel:hover { color: var(--tinta); }
+
+.moderacion { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.mod { border: var(--linea); background: #fff; padding: 1rem 1.1rem; display: grid; gap: 1rem; transition: background-color .3s ease; }
+@media (min-width: 900px) { .mod { grid-template-columns: 1fr auto; align-items: start; } }
+.mod--recien { background: var(--papel-2); }
+.mod__cuando { font-family: var(--mono); font-size: .82rem; font-weight: 700; text-transform: uppercase; }
+.mod__titulo { font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: 1.5rem; line-height: 1.05; margin-top: .3rem; overflow-wrap: anywhere; }
+.mod__titulo a { color: var(--tinta); text-decoration: none; }
+.mod__titulo a:hover { text-decoration: underline; text-decoration-color: var(--oxido); }
+.mod__meta { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; margin-top: .5rem; font-weight: 600; font-stretch: 90%; }
+.mod__origen { margin-top: .45rem; overflow-wrap: anywhere; }
+.mod__desc { margin-top: .5rem; color: var(--tinta-suave); font-size: .95rem; max-width: 75ch; }
+.mod__dup { display: flex; gap: .45rem; align-items: flex-start; margin-top: .6rem; padding: .45rem .6rem; background: #fbf1d9; border-left: 6px solid var(--coiron); font-size: .9rem; }
+.mod__dup .ico { margin-top: .15rem; }
+.mod__acciones { display: grid; gap: .6rem; justify-items: start; }
+@media (min-width: 900px) { .mod__acciones { justify-items: end; } }
+.mod__acciones form { display: flex; flex-wrap: wrap; gap: .5rem; }
+@media (min-width: 900px) { .mod__acciones form { justify-content: flex-end; max-width: 24rem; } }
+.mod.htmx-request { opacity: .5; }
+
+.edicion { display: grid; gap: 2rem; }
+@media (min-width: 1000px) { .edicion { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; } }
+.edicion__lado { padding-top: 2rem; display: grid; gap: 1rem; }
+.datos { margin: 0; display: grid; gap: .6rem; }
+.datos dt { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--tinta-suave); }
+.datos dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.nota-original { background: #fff; border: var(--linea-fina); padding: .8rem; font-size: .9rem; white-space: pre-line; max-height: 28rem; overflow: auto; display: grid; gap: .5rem; }

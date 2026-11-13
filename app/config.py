@@ -25,7 +25,14 @@ class Settings(BaseSettings):
     dias_max_nota: int = 14
     # Tope de notas nuevas por fuente y por corrida (acota requests y gasto de LLM)
     max_items_por_corrida: int = 25
-    telegram_bot_token: str = ""
+    # Panel /admin. Sin ADMIN_CLAVE el panel queda deshabilitado.
+    admin_usuario: str = "admin"
+    admin_clave: str = ""
+    # Firma las cookies de sesión y los formularios. Si falta, se genera una al arrancar
+    # (las sesiones se pierden con cada reinicio).
+    secreto: str = ""
+    # Tope de eventos que se pueden cargar desde el formulario por IP y por hora
+    max_envios_por_hora: int = 5
 
     @property
     def user_agent(self) -> str:

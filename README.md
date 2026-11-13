@@ -2,7 +2,7 @@
 
 Agenda de **qué hacer en la ciudad** (por ahora, Río Gallegos, Santa Cruz): eventos de la semana y del finde, y un mapa de plazas y espacios verdes. Los datos salen de fuentes abiertas y de organizadores que los mandan. **No se scrapean redes sociales.**
 
-Estado: **Fase 2** (ingesta de fuentes abiertas) terminada. Fase 1: base y lugares.
+Estado: **Fase 3** (formulario público y moderación) terminada. Antes: fase 1 (base y lugares) y fase 2 (ingesta de fuentes abiertas).
 
 ## Stack
 
@@ -12,13 +12,13 @@ Estado: **Fase 2** (ingesta de fuentes abiertas) terminada. Fase 1: base y lugar
 - APScheduler dentro del contenedor `worker` (sin colas externas)
 - Ingesta: `httpx`, `feedparser`, `trafilatura`, `rapidfuzz` y la API de Anthropic (`claude-haiku-5-5`) para extraer eventos
 
-Servicios del compose: `db`, `web`, `worker` y `bot` (el bot por ahora es un placeholder, llega en la fase 3).
+Servicios del compose: `db`, `web` y `worker`.
 
 ## Levantarlo
 
 ```bash
 cp .env.example .env
-# Editá .env: como mínimo POSTGRES_PASSWORD y SITIO_URL
+# Editá .env: como mínimo POSTGRES_PASSWORD, SITIO_URL, ADMIN_CLAVE y SECRETO
 docker compose up -d --build
 ```
 
@@ -59,9 +59,12 @@ docker compose logs -f worker
 | Ruta | Qué muestra |
 |---|---|
 | `/` | Redirige a la primera ciudad |
-| `/rio-gallegos` | Portada (la agenda llega en las fases 2 y 5) |
+| `/rio-gallegos` | Portada (la agenda pública todavía no está) |
 | `/rio-gallegos/plazas` | Mapa y lista de plazas, parques, juegos y jardines. Filtro por tipo, búsqueda y orden por cercanía |
-| `/estado/fuentes` | Panel de salud de las fuentes: última corrida, ítems, errores y últimos eventos detectados (público por ahora; pasa a `/admin` en la fase 3) |
+| `/rio-gallegos/cargar` | Formulario público "Cargá tu evento": sin registro, entra como pendiente |
+| `/admin/eventos` | **Panel** (pide login): moderar eventos pendientes, publicados y rechazados |
+| `/admin/eventos/{id}` | Editar un evento, ver de qué nota salió y posibles repetidos |
+| `/admin/fuentes` | Salud de las fuentes: última corrida, ítems, errores y últimos eventos detectados. `/estado/fuentes` redirige acá |
 | `/salud` | Healthcheck (JSON) |
 
 Sin JavaScript, la página de plazas sigue andando: el formulario hace GET y la lista se renderiza entera.
@@ -117,7 +120,7 @@ Sin JavaScript, la página de plazas sigue andando: el formulario hace GET y la 
      cada_horas: 4
    ```
    Una fuente con JSON propio (`tipo: api`) necesita un lector nuevo en `app/ingesta/lectores.py`.
-3. El worker relee el YAML en cada vuelta. Para probarla ya: `docker compose exec worker python -m app.cli ingestar --fuente mi-diario` y mirá `/estado/fuentes`.
+3. El worker relee el YAML en cada vuelta. Para probarla ya: `docker compose exec worker python -m app.cli ingestar --fuente mi-diario` y mirá `/admin/fuentes`.
 4. Si pusiste un `patron`, agregá un caso a `tests/test_lectores.py`.
 
 Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del YAML, queda inactiva en la base (no se borran sus datos).
@@ -134,12 +137,22 @@ Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del Y
                       └─ por evento: filtro de ciudad → dedup (±1 día, rapidfuzz) → publicado | pendiente
 ```
 
-- **Publicado** si la confianza es ≥ 0,8 y el evento todavía no pasó. Si no, **pendiente** (se modera en la fase 3).
+- **Publicado** si la confianza es ≥ 0,8 y el evento todavía no pasó. Si no, **pendiente**: queda para revisar en `/admin/eventos`.
 - **Sin hora segura** el evento se guarda a las 00:00 con `hora_confirmada = false`, y la web dice "Horario a confirmar". Nunca se inventa una hora.
 - **Deduplicación:** se normalizan título y lugar (minúsculas, sin tildes ni palabras vacías) y se comparan con `token_set_ratio` contra los eventos de ±1 día. Si es el mismo evento se queda el registro más completo y la otra URL va a `urls_alternativas`.
 - **Calendario municipal:** viene estructurado, así que entra directo, sin LLM, con confianza 0,9.
 - **Errores:** una fuente rota no frena a las demás. El error queda en el panel. Si el LLM falla, la nota se reintenta en la próxima corrida (hasta 3 veces). Si el modelo la rechaza, no se reintenta.
 - **Costo:** con Haiku 5.5 a USD 0,10 / 0,50 por millón de tokens, una nota típica (unos 2.000 tokens de entrada) cuesta alrededor de USD 0,0003. Por el prefiltro, solo una parte de las notas llega al LLM.
+
+## Formulario y moderación (fase 3)
+
+- **Formulario público** (`/{ciudad}/cargar`): cualquiera manda un evento sin registrarse. Entra siempre como **pendiente**, con confianza 0, y no se publica hasta que alguien lo aprueba. El contacto del organizador lo ve solo el admin.
+- **Contra el spam**, sin captcha: un campo trampa oculto, un token firmado con la hora en que se mostró el formulario (si llega en menos de 4 segundos es un bot, y si pasaron más de 6 horas se pide reenviar) y un tope de `MAX_ENVIOS_POR_HORA` por IP. Al bot se le contesta "gracias" igual. La IP no se guarda: solo un HMAC de ella.
+- **Panel** (`/admin`): un solo usuario (`ADMIN_USUARIO` / `ADMIN_CLAVE`). Sin `ADMIN_CLAVE` el panel queda deshabilitado. La sesión es una cookie firmada con `SECRETO` (HttpOnly, SameSite=Lax, 12 h), cada acción lleva un token CSRF, y 5 claves mal en 15 minutos bloquean esa IP.
+- **Moderar**: Publicar, Rechazar o volver a pendientes funciona con un clic (HTMX), y sin JavaScript también. El panel avisa cuando un evento se parece a otro (mismo criterio que la deduplicación).
+- **La ingesta respeta lo moderado**: un evento revisado a mano no cambia de estado ni se pisan sus datos si otra fuente trae lo mismo; solo se suma la URL. Un rechazado no vuelve a aparecer como pendiente. Y un envío del formulario sin revisar nunca se fusiona con lo que trae un diario, para que no se publique solo.
+- **Detrás de un proxy**: uvicorn corre con `--proxy-headers`, así que la IP del límite sale de `X-Forwarded-For`. Por eso en el VPS `WEB_BIND` tiene que quedar en `127.0.0.1`. Si el puerto está expuesto directo, cualquiera puede falsear esa cabecera y esquivar el límite.
+- **¿Y Telegram?** Se descartó el bot: en la ciudad los organizadores usan WhatsApp, y la API de WhatsApp Business no se justifica para esto. Alcanza con mandar el link del formulario. Si después hace falta un bot, se puede sumar encima del mismo flujo de pendientes.
 
 ## Lugares (OSM)
 
@@ -160,7 +173,11 @@ Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del Y
 
 ```
 app/
-  main.py            rutas web
+  main.py            rutas web públicas (portada, plazas)
+  formulario.py      "Cargá tu evento" (validación compartida con el panel)
+  admin.py           panel /admin: login, moderación, edición y salud de fuentes
+  seguridad.py       firmas HMAC, sesión, CSRF y límites contra abuso
+  plantillas.py      entorno Jinja2 con sus filtros y globales
   models.py          modelo de datos (ciudad, lugar, fuente, item_crudo, evento)
   http.py            cliente HTTP con rate limit, UA y backoff
   ciudades.py        config/ciudades.yaml → base

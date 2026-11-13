@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}¡Gracias! · {{ SITIO_NOMBRE }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block contenido %}
+<section class="hero">
+  <div class="contenedor hero__grilla">
+    <p class="volanta">Evento recibido</p>
+    <h1 class="hero__titulo hero__titulo--chico"><span>¡Gracias!</span><span>Ya lo tenemos</span></h1>
+    <div class="hero__pie">
+      <p class="hero__bajada">Lo revisamos y, si está todo bien, aparece en la agenda de {{ ciudad.nombre }}. Si dejaste un contacto y nos falta algún dato, te escribimos.</p>
+      <p class="acciones">
+        <a class="boton" href="/{{ ciudad.slug }}/cargar">{{ ico("i-mas") }} Cargar otro</a>
+        <a class="boton boton--coiron" href="/{{ ciudad.slug }}">Volver al inicio</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

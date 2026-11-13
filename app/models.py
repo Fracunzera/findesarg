@@ -165,6 +165,11 @@ class Evento(Base):
     estado: Mapped[str] = mapped_column(String(16), default="pendiente", index=True)
     confianza: Mapped[float] = mapped_column(Float, default=0.0)
     hash_dedup: Mapped[str | None] = mapped_column(String(64), index=True)
+    # Formulario público: contacto del organizador (solo lo ve el admin) y hash de la IP
+    # (para el límite de envíos; nunca guardamos la IP en claro).
+    contacto: Mapped[str | None] = mapped_column(String(200))
+    ip_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    moderado: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     actualizado: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
