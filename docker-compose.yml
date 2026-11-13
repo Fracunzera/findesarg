@@ -1,0 +1,56 @@
+name: quehacer
+
+x-app: &app
+  build: .
+  image: quehacer:latest
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+  depends_on:
+    db:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    env_file: .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    <<: *app
+    # Aplica las migraciones antes de levantar
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"
+    ports:
+      - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/salud')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    <<: *app
+    command: python -m app.worker
+    volumes:
+      - cache_html:/srv/data   # caché del HTML bajado
+    depends_on:
+      web:
+        condition: service_healthy   # espera a que estén aplicadas las migraciones
+
+  bot:
+    <<: *app
+    # Fase 3. Por ahora es un placeholder que queda en espera.
+    command: python -m app.bot
+
+volumes:
+  db_data:
+  cache_html:

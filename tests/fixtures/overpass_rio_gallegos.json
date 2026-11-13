@@ -1,0 +1,201 @@
+{
+ "version": 0.6,
+ "osm3s": {
+  "timestamp_osm_base": "2026-11-12T23:13:15Z",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+ },
+ "elements": [
+  {
+   "type": "node",
+   "id": 6486063826,
+   "lat": -51.6516032,
+   "lon": -69.2644741,
+   "tags": {
+    "leisure": "park",
+    "name": "Camping SATSAID \"17 de Octubre\""
+   }
+  },
+  {
+   "type": "way",
+   "id": 221694624,
+   "center": {
+    "lat": -51.6204282,
+    "lon": -69.2340942
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plazoleta \"El Gaucho\""
+   }
+  },
+  {
+   "type": "way",
+   "id": 236132394,
+   "center": {
+    "lat": -51.6233087,
+    "lon": -69.2159587
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plaza San Martín"
+   }
+  },
+  {
+   "type": "way",
+   "id": 257094879,
+   "center": {
+    "lat": -51.6154743,
+    "lon": -69.2123187
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plaza de la República"
+   }
+  },
+  {
+   "type": "way",
+   "id": 369945340,
+   "center": {
+    "lat": -51.6372405,
+    "lon": -69.2141506
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plazoleta Conquista del Desierto"
+   }
+  },
+  {
+   "type": "way",
+   "id": 439794071,
+   "center": {
+    "lat": -51.6066414,
+    "lon": -69.2386412
+   },
+   "tags": {
+    "leisure": "playground",
+    "name": "Plaza \"Barrio Capipe\""
+   }
+  },
+  {
+   "type": "way",
+   "id": 442920606,
+   "center": {
+    "lat": -51.6293871,
+    "lon": -69.2234174
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plaza \"Martín Miguel de Güemes\""
+   }
+  },
+  {
+   "type": "way",
+   "id": 450409151,
+   "center": {
+    "lat": -51.6097709,
+    "lon": -69.2454993
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Plazoleta El Camino"
+   }
+  },
+  {
+   "type": "way",
+   "id": 507477178,
+   "center": {
+    "lat": -51.61839,
+    "lon": -69.2055329
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Ria Local"
+   }
+  },
+  {
+   "type": "way",
+   "id": 507477179,
+   "center": {
+    "lat": -51.619,
+    "lon": -69.2040871
+   },
+   "tags": {
+    "leisure": "park",
+    "name": "Ria Local"
+   }
+  },
+  {
+   "type": "way",
+   "id": 108684902,
+   "center": {
+    "lat": -51.6063472,
+    "lon": -69.2384243
+   },
+   "tags": {
+    "leisure": "park"
+   }
+  },
+  {
+   "type": "way",
+   "id": 108709340,
+   "center": {
+    "lat": -51.6174305,
+    "lon": -69.2564291
+   },
+   "tags": {
+    "leisure": "park"
+   }
+  },
+  {
+   "type": "way",
+   "id": 669573656,
+   "center": {
+    "lat": -51.6175175,
+    "lon": -69.2990753
+   },
+   "tags": {
+    "leisure": "garden"
+   }
+  },
+  {
+   "type": "node",
+   "id": 12371867003,
+   "lat": -51.6128095,
+   "lon": -69.2201776,
+   "tags": {
+    "leisure": "playground"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1329711818,
+   "center": {
+    "lat": -51.6499005,
+    "lon": -69.2145324
+   },
+   "tags": {
+    "addr:city": "Río Gallegos",
+    "addr:housenumber": "1400",
+    "addr:postcode": "9400",
+    "addr:street": "Américo Semprini",
+    "leisure": "park",
+    "name": "La vecinal",
+    "opening_hours": "24/7",
+    "operator": "Municipalidad de Rio Gallegos- Barrio Procrear",
+    "operator:type": "public"
+   }
+  },
+  {
+   "type": "way",
+   "id": 999999001,
+   "center": {
+    "lat": -51.62,
+    "lon": -69.22
+   },
+   "tags": {
+    "leisure": "playground",
+    "access": "private",
+    "name": "Juegos del Club X (privado)"
+   }
+  }
+ ]
+}

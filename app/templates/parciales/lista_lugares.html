@@ -1,0 +1,46 @@
+{% from "macros.html" import ico %}
+{% macro item(f, n) -%}
+{% set l = f.l %}{% set t = TIPOS[l.tipo] %}{% set nombre = l.nombre or t.etiqueta ~ " sin nombre" %}
+<li class="lugar" id="lugar-{{ l.id }}" data-id="{{ l.id }}" data-lat="{{ f.lat }}" data-lon="{{ f.lon }}"
+    data-tipo="{{ l.tipo }}" data-nombre="{{ nombre }}" data-tipo-texto="{{ t.etiqueta }}"
+    data-icono="{{ t.icono }}" data-horario="{{ texto_horario(l.horario_osm) }}">
+  <span class="lugar__num" aria-hidden="true">{{ "%03d" | format(n) }}</span>
+  <div class="lugar__cuerpo">
+    <h3 class="lugar__nombre">{{ nombre }}</h3>
+    <p class="lugar__meta">
+      <span class="sello sello--{{ l.tipo }}">{{ ico(t.icono) }}</span>
+      <span>{{ t.etiqueta }}</span>
+      {%- if f.metros is not none %}<span class="lugar__dist">{{ f.metros | distancia }}</span>{% endif %}
+    </p>
+    {% if l.direccion %}<p class="lugar__dato">{{ ico("i-pin") }} {{ l.direccion }}</p>{% endif %}
+    <p class="lugar__dato">{{ ico("i-reloj") }}
+      {% if l.horario_osm %}Horario: {{ l.horario_osm }}{% else %}{{ texto_horario(None) }}{% endif %}</p>
+    <p class="lugar__acciones">
+      <button type="button" class="enlace ver-en-mapa" data-id="{{ l.id }}">Ver en el mapa</button>
+      <a href="https://www.openstreetmap.org/directions?to={{ f.lat }}%2C{{ f.lon }}" rel="noopener">Cómo llegar {{ ico("i-flecha") }}</a>
+    </p>
+  </div>
+</li>
+{%- endmacro %}
+<section id="lista-lugares" aria-labelledby="titulo-lista">
+  <h2 id="titulo-lista" class="lista__titulo">
+    {{ con_nombre | length + sin_nombre | length }} lugares
+    {%- if ordenado_por_cercania %} <span class="ayuda">· los más cercanos primero</span>{% endif %}
+  </h2>
+  {% if not con_nombre and not sin_nombre %}
+  <p class="vacio">No encontramos lugares con ese filtro. Probá con otro nombre o tipo.</p>
+  {% endif %}
+  <ol class="lista-lugares" role="list">
+    {% for f in con_nombre %}{{ item(f, loop.index) }}{% endfor %}
+  </ol>
+  {% if sin_nombre %}
+  <details class="sin-nombre">
+    <summary>{{ sin_nombre | length }} lugares sin nombre en OpenStreetMap</summary>
+    <ol class="lista-lugares" role="list">
+      {% for f in sin_nombre %}{{ item(f, con_nombre | length + loop.index) }}{% endfor %}
+    </ol>
+  </details>
+  {% endif %}
+  <p class="ayuda nota-osm">¿Falta una plaza o un dato está mal? Se corrige en
+    <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a> y acá se actualiza cada semana.</p>
+</section>

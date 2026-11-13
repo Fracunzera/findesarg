@@ -1,0 +1,70 @@
+[
+ {
+  "id": "evt-11",
+  "title": "Curso de guardavida",
+  "start": "2026-08-01T16:00:00",
+  "end": "2026-08-01T20:00:00",
+  "allDay": false,
+  "time_to_be_confirmed": false,
+  "backgroundColor": "#2e7d32",
+  "borderColor": "#2e7d32",
+  "extendedProps": {
+   "descripcion": "curso de guardavida - Gimnasio",
+   "lugar": "Natatorio Municipal \"Chela\" Gay",
+   "calendario": "2026",
+   "calendario_id": 3,
+   "time_to_be_confirmed": false
+  }
+ },
+ {
+  "id": "evt-12",
+  "title": "City tour - La vueltita de los sabores",
+  "start": "2026-08-01T19:30:00",
+  "end": null,
+  "allDay": false,
+  "time_to_be_confirmed": false,
+  "backgroundColor": "#0288d1",
+  "borderColor": "#0288d1",
+  "extendedProps": {
+   "descripcion": null,
+   "lugar": "Beccar 126",
+   "calendario": "2026",
+   "calendario_id": 3,
+   "time_to_be_confirmed": false
+  }
+ },
+ {
+  "id": "evt-26",
+  "title": "Talento Sureño — encuentro de bailes",
+  "start": "2026-09-05T00:00:00",
+  "end": null,
+  "allDay": true,
+  "time_to_be_confirmed": true,
+  "backgroundColor": "#2e7d32",
+  "borderColor": "#2e7d32",
+  "extendedProps": {
+   "descripcion": null,
+   "lugar": "J.B Perón",
+   "calendario": "2026",
+   "calendario_id": 3,
+   "time_to_be_confirmed": true
+  }
+ },
+ {
+  "id": "evt-56",
+  "title": "Gallegos -  Tangueros con Gala Show",
+  "start": "2026-10-24T15:00:00",
+  "end": "2026-10-24T21:00:00",
+  "allDay": false,
+  "time_to_be_confirmed": false,
+  "backgroundColor": "#3b82f6",
+  "borderColor": "#3b82f6",
+  "extendedProps": {
+   "descripcion": null,
+   "lugar": "Gimnasio Rocha",
+   "calendario": "Agenda Municipal",
+   "calendario_id": "municipal",
+   "time_to_be_confirmed": false
+  }
+ }
+]

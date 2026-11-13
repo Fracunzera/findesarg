@@ -1,0 +1,104 @@
+# Fuentes de eventos. Se sincronizan a la tabla `fuente` al arrancar el worker.
+# Antes de agregar una: revisar robots.txt y términos, y anotar la evaluación en docs/fuentes.md.
+# Nunca inventar URLs: si no se pudo confirmar que existe, dejarla comentada con "TODO: verificar".
+#
+# Campos:
+#   clave        id estable (no cambiar una vez creada)
+#   ciudad       slug de config/ciudades.yaml
+#   tipo         rss | html | api
+#   url          URL principal (se muestra en el panel)
+#   cada_horas   cada cuánto se corre (mínimo)
+#   activa       false para pausarla sin borrarla
+#   Según el tipo:
+#     rss:  (nada más)
+#     html: indice.tipo = sitemap (sitemap de Google News) | enlaces (listados + regex)
+#     api:  formato = muni_rg_calendario | muni_rg_noticias
+# Verificadas el 2026-11-12.
+
+fuentes:
+  # Calendario oficial de actividades. Ya viene estructurado: no pasa por el LLM.
+  - clave: muni-rg-calendario
+    ciudad: rio-gallegos
+    nombre: Municipalidad de Río Gallegos · Calendario de actividades
+    tipo: api
+    formato: muni_rg_calendario
+    url: https://riogallegos.gob.ar/api/calendario-activities
+    sitio: https://riogallegos.gob.ar/
+    cada_horas: 6
+
+  - clave: muni-rg-noticias
+    ciudad: rio-gallegos
+    nombre: Municipalidad de Río Gallegos · Noticias
+    tipo: api
+    formato: muni_rg_noticias
+    url: https://riogallegos.gob.ar/api/news/latest
+    url_nota: https://riogallegos.gob.ar/noticias/{slug}
+    cada_horas: 3
+
+  # Prensa del Gobierno de Santa Cruz (incluye Cultura y Turismo provinciales).
+  - clave: prensa-santa-cruz
+    ciudad: rio-gallegos
+    nombre: Prensa Gobierno de Santa Cruz
+    tipo: rss
+    url: https://noticias.santacruz.gob.ar/?format=feed&type=rss
+    cada_horas: 3
+
+  # Sin RSS, pero publica un sitemap de Google News con título y fecha de cada nota.
+  - clave: la-opinion-austral
+    ciudad: rio-gallegos
+    nombre: La Opinión Austral
+    tipo: html
+    url: https://laopinionaustral.com.ar/
+    indice:
+      # 1) Sitemap de Google News: trae fecha y título, pero a veces viene vacío.
+      - tipo: sitemap
+        urls:
+          - https://laopinionaustral.com.ar/sitemaps/sitemaps-googlenews.xml
+        # Mezcla todo: excluimos secciones que nunca traen agenda local.
+        patron: '^https://laopinionaustral\.com\.ar/(?!argentina/|el-mundo/|policiales/|politica-y-economia/|videos/|caleta-olivia/|puerto-deseado/|el-calafate/|chubut/|tierra-del-fuego/)[a-z0-9-]+/'
+      # 2) Secciones locales y de cultura (listadas en su sitemaps-daily.xml).
+      - tipo: enlaces
+        urls:
+          - https://laopinionaustral.com.ar/seccion/arte-y-cultura.html
+          - https://laopinionaustral.com.ar/seccion/espectaculos.html
+          - https://laopinionaustral.com.ar/seccion/rio-gallegos.html
+          - https://laopinionaustral.com.ar/seccion/la-ciudad-y-su-gente.html
+        patron: '^https://laopinionaustral\.com\.ar/(arte-y-cultura|espectaculos|rio-gallegos|la-ciudad-y-su-gente|sociedad)/[a-z0-9-]+-\d+\.html$'
+    cada_horas: 3
+
+  # robots.txt: Crawl-delay 10 (se respeta).
+  - clave: tiemposur
+    ciudad: rio-gallegos
+    nombre: TiempoSur
+    tipo: html
+    url: https://www.tiemposur.com.ar/
+    indice:
+      tipo: enlaces
+      urls:
+        - https://www.tiemposur.com.ar/cultura
+        - https://www.tiemposur.com.ar/espectaculos
+      patron: '^https://www\.tiemposur\.com\.ar/(cultura|espectaculos)/[a-z0-9-]+$'
+    cada_horas: 4
+
+  - clave: santacruz-al-momento
+    ciudad: rio-gallegos
+    nombre: Santa Cruz al Momento
+    tipo: html
+    url: https://www.santacruzalmomento.com.ar/
+    indice:
+      tipo: enlaces
+      urls:
+        - https://www.santacruzalmomento.com.ar/
+        - https://www.santacruzalmomento.com.ar/categoria/cultura-2
+        - https://www.santacruzalmomento.com.ar/categoria/espectaculos
+      patron: '^https://www\.santacruzalmomento\.com\.ar/20\d\d/\d\d/\d\d/[a-z0-9-]+$'
+    cada_horas: 4
+
+  # TODO: verificar. "Nuevo Día": nuevodia.com.ar, diarionuevodia.com.ar y elnuevodia.com.ar no resuelven.
+  # - clave: nuevo-dia
+  #   ...
+
+  # TODO: verificar. Turismo de Santa Cruz: santacruzpatagonia.gob.ar no respondió.
+  # Mientras tanto, las gacetillas de Turismo provincial llegan por prensa-santa-cruz.
+  # - clave: turismo-santa-cruz
+  #   ...

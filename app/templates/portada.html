@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Qué hacer en {{ ciudad.nombre }} · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="hero">
+  <div class="contenedor hero__grilla">
+    <p class="volanta">Agenda abierta · {{ ciudad.provincia }}</p>
+    <h1 class="hero__titulo">
+      <span>Qué hacer</span>
+      <span>en {{ ciudad.nombre }}</span>
+    </h1>
+    <div class="hero__pie">
+      <p class="hero__bajada">Recitales, ferias, teatro, talleres y todo lo que pasa en la ciudad. Más las plazas para salir a tomar aire cuando el viento afloja.</p>
+      <aside class="calco" aria-label="Aviso">
+        <p class="calco__titulo">En armado</p>
+        <p>La agenda de hoy, del finde y de los próximos 7 días llega muy pronto.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="secciones contenedor" aria-label="Secciones">
+  <article class="seccion seccion--agenda">
+    <p class="seccion__num">01</p>
+    <h2 class="seccion__titulo">Agenda</h2>
+    <p>Eventos de diarios locales, del municipio y de organizadores que los mandan. Siempre con link a la fuente original.</p>
+    <p class="seccion__estado">{{ ico("i-reloj") }} Próximamente</p>
+  </article>
+
+  <a class="seccion seccion--plazas" href="/{{ ciudad.slug }}/plazas">
+    <p class="seccion__num">02</p>
+    <h2 class="seccion__titulo">Plazas</h2>
+    {% if cant_lugares %}
+    <p class="seccion__cifra"><span class="cifra">{{ cant_lugares }}</span> plazas, parques y juegos en el mapa</p>
+    {% else %}
+    <p>Estamos cargando las plazas.</p>
+    {% endif %}
+    <p class="seccion__estado">Ver el mapa {{ ico("i-flecha") }}</p>
+  </a>
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Plazas y espacios verdes en {{ ciudad.nombre }} · {{ SITIO_NOMBRE }}{% endblock %}
+{% block descripcion %}Mapa y lista de plazas, parques y juegos infantiles de {{ ciudad.nombre }}, {{ ciudad.provincia }}.{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/leaflet.css">
+{% endblock %}
+{% block contenido %}
+<section class="banda banda--ria">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">02 · Espacios verdes</p>
+      <h1 class="banda__titulo">Plazas, parques y juegos</h1>
+    </div>
+    <p class="banda__cifra"><span class="cifra">{{ con_nombre | length + sin_nombre | length }}</span> lugares en el mapa</p>
+  </div>
+</section>
+
+<div class="contenedor">
+  <form class="filtros" action="/{{ ciudad.slug }}/plazas" method="get"
+        hx-get="/{{ ciudad.slug }}/plazas" hx-target="#lista-lugares" hx-swap="outerHTML"
+        hx-trigger="change, input from:#q delay:300ms, submit" hx-push-url="true">
+    <div class="buscador">
+      <label for="q" class="etiqueta">Buscar por nombre</label>
+      <div class="buscador__campo">
+        {{ ico("i-lupa") }}
+        <input type="search" id="q" name="q" value="{{ q }}" autocomplete="off" placeholder="San Martín, Güemes…">
+      </div>
+    </div>
+    <fieldset class="tipos">
+      <legend class="etiqueta">Tipo</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="tipo" value="" {% if not tipo %}checked{% endif %}>
+          {{ ico("i-check", "ico chip__check") }}<span>Todos</span></label>
+        {% for clave, t in TIPOS.items() %}
+        <label class="chip"><input type="radio" name="tipo" value="{{ clave }}" {% if tipo == clave %}checked{% endif %}>
+          {{ ico("i-check", "ico chip__check") }}<span class="sello sello--{{ clave }}">{{ ico(t.icono) }}</span><span>{{ t.etiqueta }}</span></label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <input type="hidden" name="lat" id="lat">
+    <input type="hidden" name="lon" id="lon">
+    <div class="filtros__acciones">
+      <button type="button" class="boton boton--coiron" id="cercania">{{ ico("i-pin") }} Lo más cerca mío</button>
+      <noscript><button type="submit" class="boton">Filtrar</button></noscript>
+      <p id="estado-ubicacion" class="ayuda" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+
+  <div class="plazas">
+    <div class="plazas__mapa">
+      <div id="mapa" role="region" aria-label="Mapa de plazas. La misma información está en la lista."
+           data-lat="{{ centro.lat }}" data-lon="{{ centro.lon }}"></div>
+      <ul class="leyenda" aria-label="Referencias del mapa">
+        {% for clave, t in TIPOS.items() %}
+        <li><span class="sello sello--{{ clave }}">{{ ico(t.icono) }}</span> {{ t.etiqueta }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="plazas__lista">
+      {% include "parciales/lista_lugares.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/leaflet.js" defer></script>
+<script src="/static/js/plazas.js" defer></script>
+{% endblock %}

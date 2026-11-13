@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}{{ mensaje }}{% endblock %}
+{% block contenido %}
+<section class="hero hero--error">
+  <div class="contenedor">
+    <p class="volanta">Error {{ codigo }}</p>
+    <h1 class="hero__titulo"><span>{{ mensaje }}</span></h1>
+    <p><a class="boton" href="/">Volver al inicio</a></p>
+  </div>
+</section>
+{% endblock %}

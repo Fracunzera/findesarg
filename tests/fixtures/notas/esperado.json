@@ -1,0 +1,50 @@
+{
+  "_comentario": "Fecha de publicación de todas las notas: 2026-11-12 (jueves). 'prefiltro' es lo que tiene que dar el filtro barato. 'respuesta_simulada' es una respuesta válida del LLM para los tests sin red. 'llm' son las expectativas para el test contra la API real (solo corre con ANTHROPIC_API_KEY).",
+  "01_recital.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": [
+      {"titulo": "Viento Sur Trío presenta \"Ruta 40\"", "descripcion": "La banda local presenta su nuevo disco de chamamé y folklore patagónico, con invitados.", "inicio": "2026-11-14T21:00:00-03:00", "fin": null, "hora_confirmada": true, "lugar_nombre": "Teatro Municipal", "direccion": "Pellegrini 33", "ciudad": "Río Gallegos", "precio_texto": "$15.000 anticipada, $18.000 en puerta", "gratis": false, "categoria": "musica", "confianza": 0.93}
+    ]},
+    "llm": {"eventos": 1, "fecha": "2026-11-14", "hora": "21:00", "hora_confirmada": true, "categoria": ["musica"], "gratis": false}
+  },
+  "01b_recital_otro_medio.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": [
+      {"titulo": "VIENTO SUR TRÍO LANZA RUTA 40", "descripcion": null, "inicio": "2026-11-14T00:00:00-03:00", "fin": null, "hora_confirmada": false, "lugar_nombre": "Teatro Municipal", "direccion": null, "ciudad": "Río Gallegos", "precio_texto": "$15.000 anticipada", "gratis": false, "categoria": "musica", "confianza": 0.7}
+    ]},
+    "llm": {"eventos": 1, "fecha": "2026-11-14", "hora_confirmada": false, "categoria": ["musica"]}
+  },
+  "02_agenda_finde.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": [
+      {"titulo": "Muestra \"Ría adentro\" de Martín Ojeda", "descripcion": "Inauguración de una muestra de fotografía sobre la ría.", "inicio": "2026-11-13T19:00:00-03:00", "fin": "2026-11-30T20:00:00-03:00", "hora_confirmada": true, "lugar_nombre": "Museo de Arte Eduardo Minnicelli", "direccion": "Maipú 13", "ciudad": "Río Gallegos", "precio_texto": null, "gratis": null, "categoria": "muestra", "confianza": 0.88},
+      {"titulo": "Feria de Emprendedores", "descripcion": "Más de 60 puestos de diseño, plantas y comida casera.", "inicio": "2026-11-14T10:00:00-03:00", "fin": "2026-11-14T18:00:00-03:00", "hora_confirmada": true, "lugar_nombre": "Gimnasio Juan Bautista Rocha", "direccion": null, "ciudad": "Río Gallegos", "precio_texto": "Entrada libre y gratuita", "gratis": true, "categoria": "feria", "confianza": 0.92},
+      {"titulo": "Cine infantil en el Orkeke", "descripcion": "Proyección de una película animada para chicos.", "inicio": "2026-11-15T16:00:00-03:00", "fin": null, "hora_confirmada": true, "lugar_nombre": "Centro Cultural Orkeke", "direccion": null, "ciudad": "Río Gallegos", "precio_texto": "Gratis", "gratis": true, "categoria": "infantil", "confianza": 0.85}
+    ]},
+    "llm": {"eventos": 3, "fechas": ["2026-11-13", "2026-11-14", "2026-11-15"]}
+  },
+  "03_politica.txt": {
+    "prefiltro": false,
+    "respuesta_simulada": {"eventos": []},
+    "llm": {"eventos": 0}
+  },
+  "04_feria_sin_hora.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": [
+      {"titulo": "Feria del Libro Patagónico", "descripcion": "Presentaciones de autores locales, talleres de lectura y editoriales de la región.", "inicio": "2026-11-14T00:00:00-03:00", "fin": null, "hora_confirmada": false, "lugar_nombre": "Complejo Cultural Santa Cruz", "direccion": "Ramón y Cajal 51", "ciudad": "Río Gallegos", "precio_texto": null, "gratis": null, "categoria": "feria", "confianza": 0.75}
+    ]},
+    "llm": {"eventos": 1, "fecha": "2026-11-14", "hora_confirmada": false, "categoria": ["feria"]}
+  },
+  "05_otra_ciudad.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": [
+      {"titulo": "Festival aniversario de El Calafate", "descripcion": "Bandas locales y fuegos artificiales.", "inicio": "2026-11-15T18:00:00-03:00", "fin": null, "hora_confirmada": true, "lugar_nombre": "Paseo de los Artesanos", "direccion": null, "ciudad": "El Calafate", "precio_texto": "Libre y gratuita", "gratis": true, "categoria": "musica", "confianza": 0.9}
+    ]},
+    "llm": {"eventos": 1, "ciudad_distinta": true}
+  },
+  "06_inscripcion.txt": {
+    "prefiltro": true,
+    "respuesta_simulada": {"eventos": []},
+    "llm": {"eventos": 0}
+  }
+}

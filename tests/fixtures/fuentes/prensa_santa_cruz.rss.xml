@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- generator="Joomla! - Open Source Content Management" -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Prensa Santa Cruz - Prensa Santa Cruz</title>
+		<description><![CDATA[Sitio Oficial de la Secretaría de Estado de Comunicación Pública y Medios dependiente del Ministerio de Gobierno, Provincia de Santa Cruz. ]]></description>
+		<link>https://noticias.santacruz.gob.ar/</link>
+		<lastBuildDate>Thu, 12 Nov 2026 20:56:42 -0300</lastBuildDate>
+		<generator>Joomla! - Open Source Content Management</generator>
+		<atom:link rel="self" type="application/rss+xml" href="https://noticias.santacruz.gob.ar/?format=feed&amp;type=rss"/>
+		<language>es-es</language>
+		<item>
+			<title>Provincia expuso en el CFI sus estrategias para fortalecer el arraigo de profesionales médicos</title>
+			<link>https://noticias.santacruz.gob.ar/organismos/salud/provincia-expuso-en-el-cfi-sus-estrategias-para-fortalecer-el-arraigo-de-profesionales-medicos</link>
+			<guid isPermaLink="true">https://noticias.santacruz.gob.ar/organismos/salud/provincia-expuso-en-el-cfi-sus-estrategias-para-fortalecer-el-arraigo-de-profesionales-medicos</guid>
+			<description><![CDATA[<p>Resumen recortado para el test.</p>]]></description>
+			<category>Ministerio de Salud y Ambiente</category>
+			<pubDate>Thu, 12 Nov 2026 19:46:48 -0300</pubDate>
+		</item><item>
+			<title>EduActiva continúa con la entrega de zapatillas en escuelas y jardines de Río Gallegos</title>
+			<link>https://noticias.santacruz.gob.ar/organismos/educacion/eduactiva-continua-con-la-entrega-de-zapatillas-en-escuelas-y-jardines-de-rio-gallegos</link>
+			<guid isPermaLink="true">https://noticias.santacruz.gob.ar/organismos/educacion/eduactiva-continua-con-la-entrega-de-zapatillas-en-escuelas-y-jardines-de-rio-gallegos</guid>
+			<description><![CDATA[<p>Resumen recortado para el test.</p>]]></description>
+			<category>Consejo Provincial de Educación</category>
+			<pubDate>Thu, 12 Nov 2026 19:30:29 -0300</pubDate>
+		</item><item>
+			<title>Santa Cruz avanza con el Proyecto Valles de Cultivos Alternativos para potenciar la producción provincial</title>
+			<link>https://noticias.santacruz.gob.ar/organismos/entes-publicos/consejo-agrario-provincial/santa-cruz-avanza-con-el-proyecto-valles-de-cultivos-alternativos-para-potenciar-la-produccion-provincial</link>
+			<guid isPermaLink="true">https://noticias.santacruz.gob.ar/organismos/entes-publicos/consejo-agrario-provincial/santa-cruz-avanza-con-el-proyecto-valles-de-cultivos-alternativos-para-potenciar-la-produccion-provincial</guid>
+			<description><![CDATA[<p>Resumen recortado para el test.</p>]]></description>
+			<category>Consejo Agrario Provincial</category>
+			<pubDate>Thu, 12 Nov 2026 19:27:06 -0300</pubDate>
+		</item>
+	</channel>
+</rss>

@@ -1,0 +1,12 @@
+# Ciudades habilitadas. Se sincronizan a la base al arrancar el worker
+# (o a mano con: docker compose exec worker python -m app.cli sincronizar-ciudades).
+#
+# bbox: [sur, oeste, norte, este] en grados decimales (WGS84).
+# Se usa para la consulta a Overpass y para centrar el mapa.
+
+ciudades:
+  - slug: rio-gallegos
+    nombre: Río Gallegos
+    provincia: Santa Cruz
+    timezone: America/Argentina/Rio_Gallegos
+    bbox: [-51.665, -69.345, -51.580, -69.150]

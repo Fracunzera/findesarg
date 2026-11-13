@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Estado de las fuentes · {{ SITIO_NOMBRE }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">Sala de máquinas</p>
+      <h1 class="banda__titulo">Estado de las fuentes</h1>
+    </div>
+    <dl class="banda__cifras">
+      <div><dt>Fuentes</dt><dd class="cifra">{{ filas | length }}</dd></div>
+      <div><dt>Con error</dt><dd class="cifra">{{ con_error }}</dd></div>
+      <div><dt>Publicados</dt><dd class="cifra">{{ por_estado.get("publicado", 0) }}</dd></div>
+      <div><dt>Pendientes</dt><dd class="cifra">{{ por_estado.get("pendiente", 0) }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<div class="contenedor">
+  <p class="ayuda intro-estado">Cada fuente corre sola según su frecuencia. Una nota pasa por el prefiltro de palabras de agenda y, si lo pasa, por el LLM. Los eventos con confianza de 0,8 o más y fecha futura se publican; el resto queda pendiente de revisión.</p>
+
+  <ul class="fuentes" role="list">
+    {% for x in filas %}{% set e = ESTADOS_FUENTE[x.estado] %}
+    <li class="fuente fuente--{{ x.estado }}">
+      <div class="fuente__cabeza">
+        <p class="estado estado--{{ x.estado }}">{{ ico(e.icono) }} {{ e.etiqueta }}</p>
+        <h2 class="fuente__nombre">{{ x.f.nombre }}</h2>
+        <p class="fuente__meta"><span class="etiqueta-tipo">{{ x.f.tipo }}</span>
+          <a href="{{ x.f.url }}" rel="noopener nofollow">{{ x.f.url | replace("https://", "") | truncate(60) }}</a></p>
+      </div>
+      <dl class="fuente__datos">
+        <div><dt>Última corrida</dt><dd>{{ x.f.ultima_corrida | hace }}</dd></div>
+        <div><dt>Último OK</dt><dd>{{ x.f.ultimo_ok | hace }}</dd></div>
+        <div><dt>Notas guardadas</dt><dd>{{ x.items }}</dd></div>
+        <div><dt>Pasaron el prefiltro</dt><dd>{{ x.prefiltro }}</dd></div>
+        <div><dt>Eventos</dt><dd>{{ x.eventos }}</dd></div>
+      </dl>
+      {% if x.ultima and x.ultima.error %}
+      <p class="fuente__error">{{ ico("i-error") }} <span><strong>Error:</strong> {{ x.ultima.error }}</span></p>
+      {% endif %}
+      {% if x.ultima and x.ultima.avisos %}
+      <ul class="fuente__avisos">
+        {% for a in x.ultima.avisos[:5] %}<li>{{ ico("i-aviso") }} <span>{{ a }}</span></li>{% endfor %}
+        {% if x.ultima.avisos | length > 5 %}<li class="ayuda">y {{ x.ultima.avisos | length - 5 }} avisos más</li>{% endif %}
+      </ul>
+      {% endif %}
+      {% if x.corridas %}
+      <details class="corridas">
+        <summary>Últimas {{ x.corridas | length }} corridas</summary>
+        <div class="tabla-scroll">
+          <table>
+            <thead><tr><th scope="col">Cuándo</th><th scope="col">Resultado</th><th scope="col">Vistas</th><th scope="col">Nuevas</th><th scope="col">Prefiltro</th><th scope="col">LLM</th><th scope="col">Eventos</th><th scope="col">Fusionados</th></tr></thead>
+            <tbody>
+              {% for c in x.corridas %}
+              <tr>
+                <td>{{ c.inicio | hora_local }}</td>
+                <td>{% if c.ok %}{{ ico("i-ok") }} OK{% elif c.ok is false %}{{ ico("i-error") }} Error{% else %}{{ ico("i-reloj") }} Corriendo{% endif %}</td>
+                <td>{{ c.items_vistos }}</td><td>{{ c.items_nuevos }}</td><td>{{ c.items_prefiltro }}</td>
+                <td>{{ c.items_extraidos }}</td><td>{{ c.eventos_nuevos }}</td><td>{{ c.eventos_fusionados }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+
+  <h2 class="lista__titulo eventos-recientes">Últimos eventos detectados</h2>
+  {% if not eventos %}
+  <p class="vacio">Todavía no hay eventos. Si falta la ANTHROPIC_API_KEY, las notas quedan esperando la extracción.</p>
+  {% else %}
+  <div class="tabla-scroll">
+    <table class="tabla-eventos">
+      <thead><tr><th scope="col">Estado</th><th scope="col">Evento</th><th scope="col">Cuándo</th><th scope="col">Dónde</th><th scope="col">Confianza</th><th scope="col">Fuente</th></tr></thead>
+      <tbody>
+        {% for ev, fuente_nombre in eventos %}{% set es = ESTADOS_EVENTO[ev.estado] %}
+        <tr>
+          <td class="estado estado--{{ ev.estado }}">{{ ico(es.icono) }} {{ es.etiqueta }}</td>
+          <td><strong>{{ ev.titulo }}</strong> <span class="ayuda">· {{ ev.categoria }}</span>
+            {% if ev.urls_alternativas %}<br><span class="ayuda">+{{ ev.urls_alternativas | length }} fuente(s) más</span>{% endif %}</td>
+          <td>{% if ev.hora_confirmada %}{{ ev.inicio | hora_local }}{% else %}{{ (ev.inicio | hora_local)[:-6] }} · <em>Horario a confirmar</em>{% endif %}</td>
+          <td>{{ ev.lugar_texto or "—" }}</td>
+          <td>{{ "%.2f" | format(ev.confianza) }}</td>
+          <td>{% if ev.url_origen %}<a href="{{ ev.url_origen }}" rel="noopener nofollow">{{ fuente_nombre or "Fuente" }}</a>{% else %}{{ fuente_nombre or "—" }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

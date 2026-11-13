@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-news/0.9 http://www.google.com/schemas/sitemap-news/0.9/sitemap-news.xsd">
+    
+<url>
+                <loc>https://laopinionaustral.com.ar/argentina/sergio-goycochea-en-los-martin-fierro-de-cable-2026-estar-entre-los-ternados-esta-buenisimo-731360.html</loc>
+                <news:news>
+                <news:publication>
+                <news:name>La Opinión Austral</news:name>
+                <news:language>es</news:language>
+                </news:publication>
+                <news:publication_date>2026-11-12T20:36:03-03:00</news:publication_date>
+                <news:title>Sergio Goycochea, en los Martín Fierro de Cable 2026: “Estar entre los ternados está buenísimo”</news:title>
+                <news:keywords>la-opinion-austral,Martín Fierro de Cable 2026,Sergio Goycochea</news:keywords>
+                </news:news>
+                <lastmod>2026-11-12T20:36:03-03:00</lastmod>
+                <changefreq>hourly</changefreq>
+                <image:image>
+                <image:loc>https://laopinionaustral.com.ar/resources/logos/og-image-1200x630.png</image:loc>
+                </image:image>
+
+                </url>
+<url>
+                <loc>https://laopinionaustral.com.ar/rio-gallegos/clima-en-rio-gallegos-pronostico-del-tiempo-para-este-viernes-13-de-noviembre-de-2026-731323.html</loc>
+                <news:news>
+                <news:publication>
+                <news:name>La Opinión Austral</news:name>
+                <news:language>es</news:language>
+                </news:publication>
+                <news:publication_date>2026-11-12T19:40:20-03:00</news:publication_date>
+                <news:title>Clima en Río Gallegos: pronóstico del tiempo para este viernes 13 de noviembre de 2026</news:title>
+                <news:keywords>meteored,pronóstico,Servicio Metereológico Nacional,Windguru</news:keywords>
+                </news:news>
+                <lastmod>2026-11-12T19:40:20-03:00</lastmod>
+                <changefreq>hourly</changefreq>
+                <image:image>
+                <image:loc>https://laopinionaustral.com.ar/resources/logos/og-image-1200x630.png</image:loc>
+                </image:image>
+
+                </url>
+<url>
+                <loc>https://laopinionaustral.com.ar/santa-cruz/controlaron-un-incendio-en-un-puesto-de-una-estancia-vecina-al-area-protegida-731250.html</loc>
+                <news:news>
+                <news:publication>
+                <news:name>La Opinión Austral</news:name>
+                <news:language>es</news:language>
+                </news:publication>
+                <news:publication_date>2026-11-12T19:47:03-03:00</news:publication_date>
+                <news:title>Controlaron un incendio en un puesto de una estancia vecina al área protegida</news:title>
+                <news:keywords>área protegida,Brigadistas,Consejo Agrario Provincial,incendio,parque nacional los glaciares</news:keywords>
+                </news:news>
+                <lastmod>2026-11-12T19:47:03-03:00</lastmod>
+                <changefreq>hourly</changefreq>
+                <image:image>
+                <image:loc>https://laopinionaustral.com.ar/resources/logos/og-image-1200x630.png</image:loc>
+                </image:image>
+
+                </url>
+<url>
+                <loc>https://laopinionaustral.com.ar/rio-gallegos/continua-la-busqueda-de-los-guanacos-que-escaparon-de-un-frigorifico-en-rio-gallegos-731082.html</loc>
+                <news:news>
+                <news:publication>
+                <news:name>La Opinión Austral</news:name>
+                <news:language>es</news:language>
+                </news:publication>
+                <news:publication_date>2026-11-12T19:46:36-03:00</news:publication_date>
+                <news:title>Insólita fuga y era 1, no 4: Bomberos atrapó al guanaco que escapó de un frigorífico y #8220;paseó#8221; entre los autos por las calles de Río Gallegos</news:title>
+                <news:keywords></news:keywords>
+                </news:news>
+                <lastmod>2026-11-12T19:46:36-03:00</lastmod>
+                <changefreq>hourly</changefreq>
+                <image:image>
+                <image:loc>https://laopinionaustral.com.ar/resources/logos/og-image-1200x630.png</image:loc>
+                </image:image>
+
+                </url>
+</urlset>

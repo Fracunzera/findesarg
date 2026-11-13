@@ -1,0 +1,56 @@
+{% from "macros.html" import ico %}
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}{{ SITIO_NOMBRE }}{% endblock %}</title>
+  <meta name="description" content="{% block descripcion %}Qué hacer en la ciudad: agenda de eventos, plazas y espacios verdes.{% endblock %}">
+  <meta name="theme-color" content="#f1ebdd">
+  <link rel="preload" href="/static/fonts/Archivo.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/estilo.css">
+  {% block head %}{% endblock %}
+  <script src="/static/vendor/htmx.min.js" defer></script>
+</head>
+<body class="{% block clase_body %}{% endblock %}">
+  {% include "iconos.html" %}
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera__fila">
+      <a class="logo" href="/{% if ciudad %}{{ ciudad.slug }}{% endif %}" aria-label="{{ SITIO_NOMBRE }}: inicio">
+        <span class="logo__que">{{ LOGO[0] }}</span>{% if LOGO[1] %}<span class="logo__hacer">{{ LOGO[1] }}</span>{% endif %}
+      </a>
+      {% if ciudad %}
+      <nav class="nav" aria-label="Principal">
+        <a href="/{{ ciudad.slug }}" {% if request.url.path == '/' ~ ciudad.slug %}aria-current="page"{% endif %}>Agenda</a>
+        <a href="/{{ ciudad.slug }}/plazas" {% if request.url.path.endswith('/plazas') %}aria-current="page"{% endif %}>Plazas</a>
+      </nav>
+      {% endif %}
+    </div>
+    <div class="cinta" role="presentation">
+      <div class="contenedor cinta__fila">
+        <span>{% if ciudad %}{{ ciudad.nombre }}<span class="solo-ancho"> · {{ ciudad.provincia }}</span>{% else %}Patagonia argentina{% endif %}</span>
+        <span>{{ fecha_larga(ciudad.timezone if ciudad else "America/Argentina/Rio_Gallegos") }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie__fila">
+      <p class="pie__marca">{{ LOGO[0] }}{% if LOGO[1] %}<br>{{ LOGO[1] }}{% endif %}</p>
+      <div class="pie__texto">
+        {% block pie %}{% endblock %}
+        <p>Agenda abierta, hecha en {% if ciudad %}{{ ciudad.nombre }}{% else %}la Patagonia{% endif %}. Sin scrapear redes sociales. <a href="/estado/fuentes">Estado de las fuentes</a>.</p>
+        <p>Lugares © <a href="https://www.openstreetmap.org/copyright">colaboradores de OpenStreetMap</a> (ODbL).
+          Tipografías Archivo y Chivo Mono de <a href="https://www.omnibus-type.com/">Omnibus-Type</a>, Buenos Aires.</p>
+      </div>
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
