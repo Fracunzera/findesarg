@@ -100,6 +100,7 @@ _env.globals["ESTADOS_FUENTE"] = ESTADOS_FUENTE
 _env.globals["ESTADOS_EVENTO"] = ESTADOS_EVENTO
 _env.globals["texto_horario"] = texto_horario
 _env.globals["fecha_larga"] = fecha_larga
+_env.globals["DIAS"] = DIAS
 _nombre = get_settings().sitio_nombre.strip()
 _env.globals["SITIO_NOMBRE"] = _nombre
 # Para el logo: primera palabra en negativo, el resto al lado

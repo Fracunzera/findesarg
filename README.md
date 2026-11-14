@@ -25,7 +25,7 @@ docker compose up -d --build
 - `web` aplica las migraciones (`alembic upgrade head`) antes de arrancar.
 - `worker` carga las ciudades de `config/ciudades.yaml` y, si una ciudad no tiene lugares, los importa de OSM. Después los actualiza todos los lunes a las 4:17.
 - `worker` también corre la **ingesta** cada 30 minutos: cada fuente se procesa cuando le toca según su `cada_horas`.
-- Sin `ANTHROPIC_API_KEY`, la ingesta igual baja y prefiltra las notas; las que pasan el prefiltro quedan esperando y se extraen apenas cargues la key.
+- **La key de Anthropic es opcional.** Sin `ANTHROPIC_API_KEY`, la ingesta igual baja y prefiltra las notas, y las que pasan el prefiltro aparecen en `/admin/notas` con las fechas, el lugar y la categoría detectados sin IA: creás el evento con un clic. El calendario municipal no usa IA nunca. Si algún día cargás la key, las notas que nadie revisó se extraen solas.
 - La web queda en `http://WEB_BIND:WEB_PORT` (por defecto `127.0.0.1:8000`). En el VPS, poné un reverse proxy (Nginx, Caddy, NPM) adelante.
 
 > **`SITIO_URL` tiene que ser una URL real.** Va en el User-Agent (`quehacer-bot/0.1 (+SITIO_URL)`), y `overpass-api.de` rechaza `example.com` con un 406.
@@ -65,6 +65,7 @@ docker compose logs -f worker
 | `/rio-gallegos/plazas` | Mapa y lista de plazas, parques, juegos y jardines. Filtro por tipo, búsqueda y orden por cercanía |
 | `/rio-gallegos/cargar` | Formulario público "Cargá tu evento": sin registro, entra como pendiente |
 | `/admin/eventos` | **Panel** (pide login): moderar eventos pendientes, publicados y rechazados |
+| `/admin/notas` | Notas de los diarios con posibles eventos (fechas detectadas sin IA): crear el evento o descartarla |
 | `/admin/eventos/{id}` | Editar un evento, ver de qué nota salió y posibles repetidos |
 | `/admin/fuentes` | Salud de las fuentes: última corrida, ítems, errores y últimos eventos detectados. `/estado/fuentes` redirige acá |
 | `/salud` | Healthcheck (JSON) |
@@ -162,6 +163,16 @@ Para pausar una fuente sin borrarla: `activa: false`. Si sacás una fuente del Y
 - **La ingesta respeta lo moderado**: un evento revisado a mano no cambia de estado ni se pisan sus datos si otra fuente trae lo mismo; solo se suma la URL. Un rechazado no vuelve a aparecer como pendiente. Y un envío del formulario sin revisar nunca se fusiona con lo que trae un diario, para que no se publique solo.
 - **Detrás de un proxy**: uvicorn corre con `--proxy-headers`, así que la IP del límite sale de `X-Forwarded-For`. Por eso en el VPS `WEB_BIND` tiene que quedar en `127.0.0.1`. Si el puerto está expuesto directo, cualquiera puede falsear esa cabecera y esquivar el límite.
 - **¿Y Telegram?** Se descartó el bot: en la ciudad los organizadores usan WhatsApp, y la API de WhatsApp Business no se justifica para esto. Alcanza con mandar el link del formulario. Si después hace falta un bot, se puede sumar encima del mismo flujo de pendientes.
+
+## Sin IA: notas para revisar
+
+`app/ingesta/heuristica.py` lee cada nota que pasó el prefiltro y sugiere:
+
+- **Fechas** a partir del día en que salió la nota: "sábado 14 de noviembre", "el 20/11", "el sábado 14", "este viernes", "hoy", "mañana", con la hora si está en la misma oración ("a las 21", "21 hs", "18.30"). Saltea las oraciones sobre algo que ya pasó ("se realizó", "culminó") y no confunde precios ($15.000) con horas.
+- **Lugar**: "en el Complejo Cultural…", "en el Gimnasio…" (solo nombres propios).
+- **Categoría** por palabras clave (el título pesa más). También se usa para el calendario municipal.
+
+No crea nada solo: en `/admin/notas` aparecen primero las notas que nombran la ciudad y tienen fechas que vienen. "Crear evento" abre el formulario precargado; "No es un evento" la descarta. Hay un botón para descartar de una vez las que no tienen fechas próximas.
 
 ## Lugares (OSM)
 

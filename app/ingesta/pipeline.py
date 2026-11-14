@@ -25,6 +25,7 @@ from app.config import get_settings
 from app.ingesta import dedup, lectores
 from app.ingesta.descarga import BloqueadoPorRobots, Descargador
 from app.ingesta.extractor import ErrorExtraccion, EventoExtraido, Extractor, ExtraccionRechazada
+from app.ingesta.heuristica import adivinar_categoria
 from app.ingesta.fuentes import ConfigFuente
 from app.ingesta.prefiltro import pasa_prefiltro
 from app.models import Ciudad, CorridaFuente, Evento, Fuente, ItemCrudo, Lugar
@@ -297,7 +298,7 @@ def correr_fuente(ctx: Contexto, fuente: Fuente, cfg: ConfigFuente) -> CorridaFu
                 pendientes.remove(item)
         db.commit()
         if pendientes and ctx.extractor is None:
-            corrida.avisos = [*corrida.avisos, f"{len(pendientes)} notas esperan extracción: falta ANTHROPIC_API_KEY"]
+            corrida.avisos = [*corrida.avisos, f"{len(pendientes)} notas para revisar en /admin/notas (sin ANTHROPIC_API_KEY no se extraen solas)"]
         elif pendientes:
             for item in pendientes:
                 _extraer_item(ctx, ciudad, fuente, item, corrida)
@@ -433,7 +434,7 @@ def _procesar_directo(ctx: Contexto, ciudad: Ciudad, fuente: Fuente, corrida: Co
     ne = NuevoEvento(
         titulo=ev.titulo, inicio=ev.inicio, fin=ev.fin, hora_confirmada=ev.hora_confirmada,
         descripcion=ev.descripcion, lugar_texto=ev.lugar_texto, precio_texto=None, gratis=None,
-        categoria="otro", confianza=0.9,  # fuente oficial y estructurada
+        categoria=adivinar_categoria(ev.titulo, ev.descripcion or ""), confianza=0.9,  # fuente oficial y estructurada
         url_origen=ev.url,
     )
     r = guardar_evento(db, ciudad, fuente, item, ne, ctx.ahora)

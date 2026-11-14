@@ -1,0 +1,59 @@
+{% extends "admin/_base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Crear evento desde una nota · Panel · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta"><a href="/admin/notas">← Notas</a> · {{ fuente.nombre }}</p>
+      <h1 class="banda__titulo banda__titulo--largo">Crear evento</h1>
+    </div>
+  </div>
+</section>
+
+<div class="contenedor edicion">
+  <form class="formulario" method="post" action="/admin/notas/{{ item.id }}" novalidate>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if errores %}
+    <div class="aviso" role="alert">{{ ico("i-error") }}
+      <div><p><strong>Revisá estos datos:</strong></p>
+        <ul>{% for c, msg in errores.items() %}<li><a href="#c-{{ c }}">{{ msg }}</a></li>{% endfor %}</ul></div>
+    </div>
+    {% endif %}
+    {% if not sug.futuras %}
+    <p class="aviso">{{ ico("i-reloj") }} <span>No se detectó ninguna fecha próxima: completala a mano leyendo la nota.</span></p>
+    {% elif sug.futuras | length > 1 %}
+    <p class="ayuda">Fechas encontradas en la nota (elegí una para cargarla en el formulario):
+      {% for fd in sug.futuras %}<a href="/admin/notas/{{ item.id }}?f={{ loop.index0 }}">{{ DIAS[fd.dia.weekday()][:3] }} {{ fd.dia.day }}/{{ fd.dia.month }}{% if fd.hora %} {{ fd.hora.strftime("%H:%M") }}{% endif %}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+
+    {% include "parciales/campos_evento.html" %}
+
+    <fieldset class="grupo">
+      <legend class="grupo__titulo">Al guardar</legend>
+      <div class="chips">
+        {% for clave, texto in (("publicado", "Publicar ya"), ("pendiente", "Dejar en pendientes")) %}
+        <label class="chip"><input type="radio" name="estado" value="{{ clave }}" {% if v.get("estado", "publicado") == clave %}checked{% endif %}>
+          {{ ico("i-check", "ico chip__check") }}<span>{{ texto }}</span></label>
+        {% endfor %}
+      </div>
+      <label class="chip"><input type="checkbox" name="otro" value="1"> {{ ico("i-check", "ico chip__check") }}<span>La nota tiene otro evento más (volver a esta nota)</span></label>
+    </fieldset>
+
+    <div class="formulario__acciones">
+      <button type="submit" class="boton">{{ ico("i-check") }} Crear evento</button>
+      <a href="/admin/notas">Cancelar</a>
+    </div>
+  </form>
+
+  <aside class="edicion__lado" aria-label="La nota">
+    <h2 class="lista__titulo">La nota</h2>
+    <p><a href="{{ item.url }}" rel="noopener noreferrer nofollow" target="_blank">Abrir en el diario</a></p>
+    {% for fd in sug.futuras %}
+    <p class="mod__dup">{{ ico("i-reloj") }} <span><strong>{{ DIAS[fd.dia.weekday()] }} {{ fd.dia.day }}/{{ fd.dia.month }}{% if fd.hora %} {{ fd.hora.strftime("%H:%M") }}{% endif %}:</strong> {{ fd.fragmento }}</span></p>
+    {% endfor %}
+    <div class="nota-original">{% if item.titulo %}<p><strong>{{ item.titulo }}</strong></p>{% endif %}<p>{{ (item.texto or "Sin texto") | truncate(6000) }}</p></div>
+  </aside>
+</div>
+{% endblock %}

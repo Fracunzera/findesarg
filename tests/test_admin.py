@@ -248,3 +248,52 @@ def test_ingesta_respeta_lo_moderado(db, ciudad):
     ev = _eventos(db, ciudad)[0]
     assert ev.estado == "rechazado" and ev.descripcion == "Corregida a mano" and ev.precio_texto is None
     assert "https://otro.test/nota" in ev.urls_alternativas
+
+
+# --- Notas para revisar (sin LLM) -------------------------------------------------------------
+def _nota(db, ciudad, texto, titulo="El Club Miramar celebra su aniversario con una peña"):
+    from app.models import ItemCrudo
+    f = _fuente_diario(db, ciudad)
+    it = ItemCrudo(fuente_id=f.id, url=f"https://diario.test/nota-{time.time_ns()}", titulo=titulo, texto=texto,
+                   fecha_publicacion=datetime.now(timezone.utc), paso_prefiltro=True)
+    db.add(it)
+    db.commit()
+    return it
+
+
+def test_notas_sugerir_y_crear_evento(db, ciudad):
+    manana = datetime.now(TZ).date() + timedelta(days=1)
+    meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre",
+             "octubre", "noviembre", "diciembre"]
+    texto = (f"La peña será el {manana.day} de {meses[manana.month - 1]} a las 21 horas en el Gimnasio Rocha. "
+             "Habrá música en vivo y la entrada es libre.")
+    it = _nota(db, ciudad, texto)
+    c = TestClient(app)
+    csrf = _login(c)
+
+    r = c.get("/admin/notas")
+    assert r.status_code == 200 and it.titulo in r.text
+    r = c.get(f"/admin/notas/{it.id}")
+    assert f'value="{manana.isoformat()}"' in r.text and 'value="21:00"' in r.text and "Gimnasio Rocha" in r.text
+
+    datos = {"csrf": csrf, "titulo": "Peña del Club Miramar", "fecha": manana.isoformat(), "hora": "21:00",
+             "lugar": "Gimnasio Rocha", "categoria": "musica", "gratis": "si", "enlace": it.url, "estado": "publicado"}
+    assert c.post(f"/admin/notas/{it.id}", data={**datos, "csrf": "mal"}).status_code == 403
+    r = c.post(f"/admin/notas/{it.id}", data=datos, follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"].startswith("/admin/notas?ok=")
+    ev = _eventos(db, ciudad)[-1]
+    assert ev.estado == "publicado" and ev.item_crudo_id == it.id and ev.moderado is not None
+    db.refresh(it)
+    assert it.procesado is not None and it.extraccion["eventos"] == [ev.id]
+    assert c.get(f"/{SLUG}").text.count("Peña del Club Miramar") >= 1  # ya sale en la agenda
+
+
+def test_notas_descartar(db, ciudad):
+    it = _nota(db, ciudad, "Se presentó el informe de gestión.")
+    c = TestClient(app)
+    csrf = _login(c)
+    r = c.post(f"/admin/notas/{it.id}/descartar", data={"csrf": csrf}, headers={"HX-Request": "true"})
+    assert r.status_code == 200 and r.text == ""
+    db.refresh(it)
+    assert it.procesado is not None and "Descartada" in it.error
+    assert it.titulo not in c.get("/admin/notas?ver=todas").text

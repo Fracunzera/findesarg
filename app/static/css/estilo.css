@@ -586,3 +586,12 @@ td .ico { width: 1em; height: 1em; }
 .ficha .aviso { margin: 0 0 1.25rem; }
 .ficha__lado { display: grid; gap: .9rem; }
 .ficha__fuentes { margin: 0; padding-left: 1.1rem; display: grid; gap: .35rem; font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
+
+/* --------------------------------------------------------------------------
+   Admin: notas con posibles eventos
+   -------------------------------------------------------------------------- */
+.notas__barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.25rem 0; }
+a.chip { text-decoration: none; color: var(--tinta); }
+.chip--activo { background: var(--tinta); color: var(--papel) !important; }
+.mod__meta a.etiqueta-tipo { text-decoration: none; display: inline-flex; align-items: center; gap: .3rem; }
+.mod__meta a.etiqueta-tipo .ico { width: 1em; height: 1em; }

@@ -16,8 +16,9 @@ from sqlalchemy.orm import Session
 from app import seguridad
 from app.db import get_db
 from app.formulario import validar_evento
-from app.ingesta import dedup
-from app.ingesta.pipeline import buscar_lugar
+from app.ingesta import dedup, heuristica
+from app.ingesta.lectores import _resumen
+from app.ingesta.pipeline import buscar_lugar, slug_unico
 from app.models import ESTADOS_EVENTO, Ciudad, CorridaFuente, Evento, Fuente, ItemCrudo
 from app.plantillas import templates
 
@@ -253,6 +254,144 @@ async def guardar(request: Request, evento_id: int, cookie: str = Depends(requie
     db.commit()
     log.info("Admin: evento %s editado (%s)", ev.id, estado)
     return RedirectResponse(f"/admin/eventos?estado={estado}&ok={quote('Guardado: ' + ev.titulo[:60])}", status_code=303)
+
+
+# --- Notas para revisar (sin LLM) -------------------------------------------------------------
+def _notas_pendientes(db: Session):
+    """Notas que pasaron el prefiltro y nadie procesó todavía (ni el LLM ni una persona)."""
+    return (
+        select(ItemCrudo, Fuente).join(Fuente, ItemCrudo.fuente_id == Fuente.id)
+        .where(ItemCrudo.paso_prefiltro.is_(True), ItemCrudo.procesado.is_(None),
+               Fuente.tipo.in_(("rss", "html", "api")))
+    )
+
+
+def _sugerencia(item: ItemCrudo, ciudad: Ciudad, hoy) -> dict:
+    tz = ZoneInfo(ciudad.timezone)
+    pub = (item.fecha_publicacion or item.creado).astimezone(tz).date()
+    s = heuristica.sugerir(item.titulo or "", item.texto or "", pub)
+    futuras = [f for f in s.fechas if f.dia >= hoy]
+    texto = heuristica.normalizar(f"{item.titulo or ''} {item.texto or ''}")
+    return {
+        "s": s, "futuras": futuras, "publicado": pub,
+        "local": heuristica.normalizar(ciudad.nombre) in texto,
+    }
+
+
+@router.get("/notas", response_class=HTMLResponse)
+def notas(request: Request, ver: str = Query("futuras"), ok: str = Query(""),
+          cookie: str = Depends(requiere_admin), db: Session = Depends(get_db)):
+    ver = ver if ver in ("futuras", "todas") else "futuras"
+    ciudades = {c.id: c for c in db.scalars(select(Ciudad))}
+    filas = []
+    for item, fuente in db.execute(_notas_pendientes(db).order_by(ItemCrudo.fecha_publicacion.desc().nullslast())):
+        ciudad = ciudades[fuente.ciudad_id]
+        hoy = datetime.now(ZoneInfo(ciudad.timezone)).date()
+        filas.append({"item": item, "fuente": fuente, **_sugerencia(item, ciudad, hoy)})
+    con_fechas = [f for f in filas if f["futuras"]]
+    mostradas = con_fechas if ver == "futuras" else filas
+    # Primero las que nombran la ciudad, después por fecha del evento más cercano
+    mostradas.sort(key=lambda f: (not f["local"], f["futuras"][0].dia if f["futuras"] else datetime.max.date()))
+    return templates.TemplateResponse(request, "admin/notas.html", _ctx(
+        request, cookie, filas=mostradas[:POR_PAGINA], total=len(filas), con_fechas=len(con_fechas),
+        ver=ver, ok=ok[:100], hay_mas=len(mostradas) > POR_PAGINA,
+    ))
+
+
+def _nota(db: Session, item_id: int) -> tuple[ItemCrudo, Fuente, Ciudad]:
+    item = db.get(ItemCrudo, item_id)
+    fuente = db.get(Fuente, item.fuente_id) if item else None
+    if item is None or fuente is None:
+        raise HTTPException(404, "Esa nota no existe.")
+    return item, fuente, db.get(Ciudad, fuente.ciudad_id)
+
+
+@router.post("/notas/{item_id}/descartar", response_class=HTMLResponse)
+def descartar_nota(request: Request, item_id: int, _: str = Depends(requiere_admin_csrf), db: Session = Depends(get_db)):
+    item, _f, _c = _nota(db, item_id)
+    if item.procesado is None:
+        item.procesado, item.error = datetime.now(timezone.utc), "Descartada en el panel"
+        db.commit()
+    if request.headers.get("HX-Request"):
+        return HTMLResponse("")
+    return RedirectResponse("/admin/notas", status_code=303)
+
+
+@router.post("/notas/descartar-sin-fecha")
+def descartar_sin_fecha(_: str = Depends(requiere_admin_csrf), db: Session = Depends(get_db)):
+    """Descarta de una vez las notas en las que no se encontró ninguna fecha que venga."""
+    ciudades = {c.id: c for c in db.scalars(select(Ciudad))}
+    ahora, n = datetime.now(timezone.utc), 0
+    for item, fuente in db.execute(_notas_pendientes(db)).all():
+        ciudad = ciudades[fuente.ciudad_id]
+        if not _sugerencia(item, ciudad, datetime.now(ZoneInfo(ciudad.timezone)).date())["futuras"]:
+            item.procesado, item.error = ahora, "Descartada en el panel (sin fechas próximas)"
+            n += 1
+    db.commit()
+    log.info("Admin: %s notas sin fecha descartadas", n)
+    return RedirectResponse(f"/admin/notas?ok={quote(f'Se descartaron {n} notas sin fechas próximas')}", status_code=303)
+
+
+def _render_nota(request, cookie, item, fuente, ciudad, valores, sug, errores=None, status=200):
+    return templates.TemplateResponse(request, "admin/nota.html", _ctx(
+        request, cookie, item=item, fuente=fuente, v=valores, errores=errores or {}, sug=sug,
+    ), status_code=status)
+
+
+@router.get("/notas/{item_id}", response_class=HTMLResponse)
+def nota(request: Request, item_id: int, f: int = Query(0), cookie: str = Depends(requiere_admin), db: Session = Depends(get_db)):
+    item, fuente, ciudad = _nota(db, item_id)
+    sug = _sugerencia(item, ciudad, datetime.now(ZoneInfo(ciudad.timezone)).date())
+    fechas = sug["futuras"]
+    elegida = fechas[f] if 0 <= f < len(fechas) else (fechas[0] if fechas else None)
+    valores = {
+        "titulo": (item.titulo or "")[:200],
+        "fecha": elegida.dia.isoformat() if elegida else "",
+        "hora": elegida.hora.strftime("%H:%M") if elegida and elegida.hora else "",
+        "lugar": sug["s"].lugar or "", "categoria": sug["s"].categoria,
+        "descripcion": _resumen(item.texto) or "", "enlace": item.url, "estado": "publicado",
+    }
+    return _render_nota(request, cookie, item, fuente, ciudad, valores, sug)
+
+
+@router.post("/notas/{item_id}", response_class=HTMLResponse)
+async def crear_desde_nota(request: Request, item_id: int, cookie: str = Depends(requiere_admin_csrf),
+                           db: Session = Depends(get_db)):
+    item, fuente, ciudad = _nota(db, item_id)
+    form = await request.form()
+    valores = {k: str(v) for k, v in form.items() if k != "csrf"}
+    tz = ZoneInfo(ciudad.timezone)
+    datos, errores = validar_evento(form, tz, datetime.now(tz).date(), permitir_pasado=True)
+    estado = str(form.get("estado") or "publicado")
+    if estado not in ("publicado", "pendiente"):
+        errores["estado"] = "Estado inválido."
+    if errores:
+        sug = _sugerencia(item, ciudad, datetime.now(tz).date())
+        return _render_nota(request, cookie, item, fuente, ciudad, valores, sug, errores, status=422)
+
+    ahora = datetime.now(timezone.utc)
+    ev = Evento(
+        ciudad_id=ciudad.id, slug=slug_unico(db, datos.titulo, datos.inicio, tz),
+        titulo=datos.titulo, descripcion=datos.descripcion, inicio=datos.inicio, fin=datos.fin,
+        hora_confirmada=datos.hora_confirmada, lugar_id=buscar_lugar(db, ciudad.id, datos.lugar_texto),
+        lugar_texto=datos.lugar_texto, precio_texto=datos.precio_texto, gratis=datos.gratis,
+        categoria=datos.categoria, url_origen=datos.url_origen or item.url, urls_alternativas=[],
+        fuente_id=fuente.id, item_crudo_id=item.id, estado=estado, confianza=0.0, moderado=ahora,
+        hash_dedup=dedup.hash_dedup(dedup.DatosDedup(datos.titulo, datos.inicio, datos.lugar_texto), tz),
+        contacto=datos.contacto,
+    )
+    db.add(ev)
+    db.flush()
+    otro = bool(form.get("otro"))
+    if not otro:
+        item.procesado = ahora
+    item.extraccion = {"manual": True, "eventos": [*((item.extraccion or {}).get("eventos") or []), ev.id]}
+    item.error = None
+    db.commit()
+    log.info("Admin: evento %s creado a mano desde la nota %s", ev.id, item.id)
+    if otro:
+        return RedirectResponse(f"/admin/notas/{item.id}", status_code=303)
+    return RedirectResponse(f"/admin/notas?ok={quote('Creado: ' + ev.titulo[:60])}", status_code=303)
 
 
 # --- Fuentes ----------------------------------------------------------------------------------

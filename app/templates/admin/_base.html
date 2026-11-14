@@ -4,6 +4,7 @@
 {% block nav %}{% if csrf %}
 <nav class="nav" aria-label="Panel">
   <a href="/admin/eventos" {% if request.url.path.startswith('/admin/eventos') %}aria-current="page"{% endif %}>Eventos</a>
+  <a href="/admin/notas" {% if request.url.path.startswith('/admin/notas') %}aria-current="page"{% endif %}>Notas</a>
   <a href="/admin/fuentes" {% if request.url.path == '/admin/fuentes' %}aria-current="page"{% endif %}>Fuentes</a>
   <form method="post" action="/admin/salir" class="nav__form">
     <input type="hidden" name="csrf" value="{{ csrf }}">

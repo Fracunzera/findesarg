@@ -1,0 +1,71 @@
+{% extends "admin/_base.html" %}
+{% from "macros.html" import ico %}
+{% block titulo %}Notas · Panel · {{ SITIO_NOMBRE }}{% endblock %}
+{% block contenido %}
+<section class="banda banda--tinta">
+  <div class="contenedor banda__grilla">
+    <div>
+      <p class="volanta">Sin IA: lo revisás vos</p>
+      <h1 class="banda__titulo">Notas con posibles eventos</h1>
+    </div>
+    <dl class="banda__cifras">
+      <div><dt>Con fechas próximas</dt><dd class="cifra">{{ con_fechas }}</dd></div>
+      <div><dt>Para revisar</dt><dd class="cifra">{{ total }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<div class="contenedor">
+  {% if ok %}<p class="aviso aviso--ok" role="status">{{ ico("i-ok") }} <span>{{ ok }}</span></p>{% endif %}
+  <p class="ayuda">Notas de los diarios que hablan de algo parecido a un evento. Las fechas, el lugar y la categoría se detectan solos y pueden fallar: revisalos antes de crear el evento. Primero aparecen las que nombran la ciudad.</p>
+
+  <div class="notas__barra">
+    <div class="chips">
+      <a class="chip{% if ver == 'futuras' %} chip--activo{% endif %}" href="/admin/notas?ver=futuras" {% if ver == 'futuras' %}aria-current="page"{% endif %}><span>Con fechas próximas ({{ con_fechas }})</span></a>
+      <a class="chip{% if ver == 'todas' %} chip--activo{% endif %}" href="/admin/notas?ver=todas" {% if ver == 'todas' %}aria-current="page"{% endif %}><span>Todas ({{ total }})</span></a>
+    </div>
+    {% if total > con_fechas %}
+    <form method="post" action="/admin/notas/descartar-sin-fecha" onsubmit="return confirm('¿Descartar las {{ total - con_fechas }} notas sin fechas próximas?')">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="boton boton--chico boton--papel">{{ ico("i-error") }} Descartar las {{ total - con_fechas }} sin fechas próximas</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if not filas %}
+  <p class="vacio">No hay notas para revisar.</p>
+  {% else %}
+  <ul class="moderacion" role="list">
+    {% for x in filas %}{% set it = x.item %}
+    <li class="mod" id="nota-{{ it.id }}">
+      <div class="mod__cuerpo">
+        <p class="mod__cuando">{{ x.fuente.nombre }} · {{ x.publicado.day }}/{{ x.publicado.month }}{% if x.local %} · <strong>Local</strong>{% endif %}</p>
+        <h2 class="mod__titulo"><a href="/admin/notas/{{ it.id }}">{{ it.titulo or it.url }}</a></h2>
+        {% if x.futuras %}
+        <p class="mod__meta">
+          {% for fd in x.futuras[:4] %}
+          <a class="etiqueta-tipo" href="/admin/notas/{{ it.id }}?f={{ loop.index0 }}" title="{{ fd.fragmento }}">{{ ico("i-reloj") }} {{ DIAS[fd.dia.weekday()][:3] }} {{ fd.dia.day }}/{{ fd.dia.month }}{% if fd.hora %} {{ fd.hora.strftime("%H:%M") }}{% endif %}</a>
+          {% endfor %}
+          {% if x.s.lugar %}<span>{{ ico("i-pin") }} {{ x.s.lugar }}</span>{% endif %}
+          <span>{{ CATEGORIAS.get(x.s.categoria, x.s.categoria) }}</span>
+        </p>
+        <p class="mod__desc">{{ x.futuras[0].fragmento | truncate(240) }}</p>
+        {% else %}
+        <p class="mod__desc ayuda">No se encontró ninguna fecha próxima.</p>
+        {% endif %}
+        <p class="mod__origen ayuda"><a href="{{ it.url }}" rel="noopener noreferrer nofollow" target="_blank">Ver la nota original</a></p>
+      </div>
+      <div class="mod__acciones">
+        <a class="boton boton--chico boton--mata" href="/admin/notas/{{ it.id }}">{{ ico("i-mas") }} Crear evento</a>
+        <form method="post" action="/admin/notas/{{ it.id }}/descartar" hx-post="/admin/notas/{{ it.id }}/descartar" hx-target="#nota-{{ it.id }}" hx-swap="outerHTML">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="boton boton--chico boton--lenga">{{ ico("i-error") }} No es un evento</button>
+        </form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if hay_mas %}<p class="ayuda">Se muestran las primeras 100.</p>{% endif %}
+  {% endif %}
+</div>
+{% endblock %}
